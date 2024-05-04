@@ -1,0 +1,8 @@
+        .tableWapper { 
+          width:100%;
+          max-height:500px; 
+          overflow: auto; 
+        } 
+        .tablePage {
+          margin: 1rem 2rem;
+        }

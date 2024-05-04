@@ -1,0 +1,26 @@
+.unsendMessage{
+          font-style: italic !important;
+          color: grey !important;
+}
+.reaction {
+          position: relative;
+          bottom: -20px;
+          right: 0;
+          background: white;
+          color: black;
+          border-radius: 30%;
+          width: fit-content;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}
+.customImage{
+    width:100% !important;
+    height: 100% !important;
+    max-width: "400px" !important;
+    max-height: "400px" !important;
+    object-fit: contain !important;
+}
+      
