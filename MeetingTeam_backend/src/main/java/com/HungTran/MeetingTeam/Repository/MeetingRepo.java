@@ -15,4 +15,6 @@ import jakarta.transaction.Transactional;
 public interface MeetingRepo extends JpaRepository<Meeting,String>{
 	@Query("select m from Meeting m left join fetch m.messages where m.channelId=?1 order by m.createdAt DESC")
 	public List<Meeting> getMeetingsByChannelId(String channelId, Pageable pageable);
+	
+	public List<Meeting> findMeetingsByInstanceName(String instanceName);
 }

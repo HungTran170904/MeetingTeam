@@ -33,13 +33,13 @@ public class UserConverter {
 		dto.setUrlIcon(u.getUrlIcon());
 		dto.setPhoneNumber(u.getPhoneNumber());
 		dto.setNickName(u.getNickName());
+		dto.setRole(u.getRole().getRoleName());
 		dto.setLastActive(u.getLastActive());
 		dto.setCalendarMeetingIds(u.getCalendarMeetingIds());
 		return dto;
 	}
 	public UserDTO convertUserToDTO(User u, String token) {
 		var dto=convertUserToDTO(u);
-		dto.setToken(token);
 		return dto;
 	}
 	public List<UserDTO> convertUserToDTO(List<User> users) {

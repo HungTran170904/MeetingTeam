@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.InfoChecking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class WebSocketEventListener {
 	TeamRepo teamRepo;
 	@Autowired
 	UserRepo userRepo;
+	@Autowired
+	InfoChecking infoChecking;
 	@EventListener
 	public void handleWebSocketConnectListener(
 			SessionConnectedEvent event) {

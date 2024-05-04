@@ -1,7 +1,10 @@
 package com.HungTran.MeetingTeam.Security;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
@@ -32,12 +35,19 @@ public class JwtProvider {
 				.compact();
 		return jwtConfig.prefix+token;
 	}
+	public Cookie generateTokenCookie(Authentication auth){
+		Cookie cookie=new Cookie(jwtConfig.header,generateToken(auth));
+		cookie.setPath("/");
+		cookie.setMaxAge(jwtConfig.expiration);
+		return cookie;
+	}
 	public String getIdFromToken(String token) {
 		try {
+			String content=token.substring(jwtConfig.prefix.length(), token.length());
 			Claims claims = Jwts.parserBuilder()
 					.setSigningKey(jwtConfig.secret.getBytes())
 					.build()
-					.parseClaimsJws(token)
+					.parseClaimsJws(content)
 					.getBody();
 			return claims.getSubject();
 		} catch (Exception ex) {

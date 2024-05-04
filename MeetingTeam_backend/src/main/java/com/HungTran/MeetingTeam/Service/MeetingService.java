@@ -40,10 +40,6 @@ import com.HungTran.MeetingTeam.Util.ZegoToken;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 
-
-
-
-
 @Service
 @Transactional
 public class MeetingService {
@@ -92,7 +88,7 @@ public class MeetingService {
 			throw new PermissionException("You do not have permission to create a meeting from this team");
 		meeting=meetingRepo.save(meeting);
 		if(meeting.getScheduledTime()!=null) {
-			schedulerService.addTask(team, meeting);
+			schedulerService.addTask(meeting);
 		}
 		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
 	}
@@ -107,7 +103,7 @@ public class MeetingService {
 		meeting.setScheduledTime(dto.getScheduledTime());
 		meeting.setScheduledDaysOfWeek(dto.getScheduledDaysOfWeek());
 		meeting.setEndDate(dto.getEndDate());
-		schedulerService.addTask(team,meeting);
+		schedulerService.addTask(meeting);
 		meeting.setTitle(dto.getTitle());
 		meeting=meetingRepo.save(meeting);
 		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
@@ -142,7 +138,7 @@ public class MeetingService {
 			meeting.setIsCanceled(true);
 		}
 		else {
-			schedulerService.addTask(team, meeting);
+			schedulerService.addTask(meeting);
 			meeting.setIsCanceled(false);
 		}
 		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));

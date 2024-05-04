@@ -39,8 +39,7 @@ public class GoogleAPIConfig {
 	@Value("${google.token-directory}")
 	private String tokenDirectory;
 	
-	public Credential getCredentials(HttpTransport httpTransport,JsonFactory jsonFactory) throws IOException {
-		
+	public Credential getCredentials(HttpTransport httpTransport,JsonFactory jsonFactory) throws IOException {		
 		List<String> scopes=List.of(GmailScopes.GMAIL_SEND);
 		// Load client secrets.
 		InputStream in = Gmail.class.getResourceAsStream(credentialFilePath);

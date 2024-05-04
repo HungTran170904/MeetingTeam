@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Security;
 
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.Constraint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -27,6 +28,8 @@ public class CustomUserDetailsService implements UserDetailsService{
 	public CustomUserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		User u=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Email "+email+" does not exists"));
 		if(!u.getIsActivated()) throw new PermissionException("Account is not activated");
+		if(!u.getProvider().equals(Constraint.CUSTOM))
+			throw new RequestException("This account must be logined with social provider "+u.getProvider());
 		return new CustomUserDetails(u);
 	}
 	public CustomUserDetails loadUserById(String id) {

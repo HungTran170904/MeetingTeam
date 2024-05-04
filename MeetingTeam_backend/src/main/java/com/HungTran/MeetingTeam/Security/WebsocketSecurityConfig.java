@@ -15,5 +15,4 @@ public class WebsocketSecurityConfig extends AbstractSecurityWebSocketMessageBro
 	protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
 		messages.anyMessage().permitAll();
 	}
-	
 }

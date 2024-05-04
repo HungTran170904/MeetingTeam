@@ -19,4 +19,8 @@ public class Constraint {
 	//Channel type
 	public static final String TEXT_CHANNEL="TEXT_CHANNEL";
 	public static final String VOICE_CHANNEL="VOICE_CHANNEL";
+	// Auth 2.0 source
+	public static final String CUSTOM="CUSTOM";
+	public static final String GIHUB="GIHUB";
+	public static final String GOOGLE="GOOGLE";
 }

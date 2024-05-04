@@ -1,6 +1,7 @@
 package com.HungTran.MeetingTeam.Security;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 
@@ -30,13 +31,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
-		String header=request.getHeader(jwtConfig.header);
-		System.out.println("Url is "+request.getRequestURL());
-		if(header==null||!header.startsWith(jwtConfig.prefix)) {
+		String token=null;
+		var cookies=request.getCookies();
+		if(request.getCookies()!=null)
+		for(var cookie : request.getCookies()){
+			if(cookie.getName().equals(jwtConfig.header)){
+				token=cookie.getValue();
+				break;
+			}
+		}
+		System.out.println("Url is "+request.getRequestURL()+"-Cookie:"+token);
+		if(token==null||!token.startsWith(jwtConfig.prefix)||request.getRequestURL().indexOf("/api/auth")>0) {
 			chain.doFilter(request, response);
 			return;
 		}
-		String token=header.substring(jwtConfig.prefix.length(),header.length());
+
 		String id=jwtProvider.getIdFromToken(token);
 		CustomUserDetails userDetails=customUserDetailsService.loadUserById(id);
 		 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,

@@ -23,7 +23,7 @@ public class UserDTO {
 	private String phoneNumber;
 	private LocalDate birthday;
 	private String status; //ONLINE, OFFLINE
-	private String token;
+	private String role;
 	private LocalDateTime lastActive;
 	private Set<String> calendarMeetingIds;
 }

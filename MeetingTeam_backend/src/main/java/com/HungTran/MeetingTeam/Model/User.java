@@ -19,14 +19,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
-	@Id
-	@UuidGenerator
+	@Id @UuidGenerator
 	private String id;
 	@Column(nullable=false, unique=true)
 	private String email;
@@ -40,6 +42,7 @@ public class User {
 	private Boolean isActivated=false; 
 	private LocalDateTime lastActive;
 	private String status; //ONLINE, OFFLINE
+	private String provider;
 	@ManyToOne
 	@JoinColumn(name="roleId")
 	private Role role;

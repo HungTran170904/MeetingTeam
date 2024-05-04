@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Security;
 
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.InfoChecking;
 import org.aopalliance.intercept.Interceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -40,11 +42,10 @@ public class WebsocketAuthenticationConfig implements WebSocketMessageBrokerConf
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 				System.out.println("There is a websocket request");
 				if(StompCommand.CONNECT.equals(accessor.getCommand())) {
-					List<String> authorization = accessor.getNativeHeader("Authorization");
-					LOGGER.debug("Authorization {}", authorization);
-					
-					String accessToken=authorization.get(0).split(" ")[1];
-					String userId=jwtProvider.getIdFromToken(accessToken);
+					List<String> token = accessor.getNativeHeader("Authorization");
+					LOGGER.debug("Authorization {}", token);
+
+					String userId=jwtProvider.getIdFromToken(token.get(0));
 					CustomUserDetails userDetails=customUserDetailsService.loadUserById(userId);
 					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
 			                   userDetails.getAuthorities());

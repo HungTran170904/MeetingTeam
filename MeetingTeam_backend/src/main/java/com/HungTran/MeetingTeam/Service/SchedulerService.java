@@ -32,6 +32,9 @@ import com.HungTran.MeetingTeam.Repository.ChannelRepo;
 import com.HungTran.MeetingTeam.Repository.MeetingRepo;
 import com.HungTran.MeetingTeam.Util.DateTimeUtil;
 
+import jakarta.annotation.PostConstruct;
+import lombok.Builder;
+
 @Service
 public class SchedulerService {
 	@Value("rabbitmq.queue-name")
@@ -50,14 +53,10 @@ public class SchedulerService {
 	ThreadPoolTaskScheduler taskScheduler;
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	@Autowired @Qualifier("emailTasks")
-	Map<String,ScheduledFuture<?>> emailTasks;
-	@Autowired @Qualifier("beginTasks")
-	Map<String,ScheduledFuture<?>> beginTasks;
-	@Autowired @Qualifier("endTasks")
-	Map<String,ScheduledFuture<?>> endTasks;
+	@Autowired
+	Map<String,ScheduledFuture<?>> scheduledTasks;
 	private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-	private final long distance=24*60*60*1000;
+	private final long distance=24*60*60;
 	
 	private void sendEmailNotification(String meetingId,LocalDateTime time) {
 		var meeting=meetingRepo.findById(meetingId).orElseThrow(()->new RequestException("MeetingId "+meetingId+" does not exists"));
@@ -73,39 +72,30 @@ public class SchedulerService {
 			}
 		}
 	}
-	public void addTask(Team team, Meeting meeting) {
+	public void addTask(Meeting meeting) {
 		removeTask(meeting);
 		if(meeting.getScheduledTime()!=null) {
-			if(meeting.getScheduledDaysOfWeek()==null||meeting.getScheduledDaysOfWeek().size()==0) {
-				long diffSec=ChronoUnit.MILLIS.between(LocalDateTime.now(),meeting.getScheduledTime());
-				if(diffSec<=distance+5*60*1000) sendEmailNotification(meeting.getId(),meeting.getScheduledTime());
+			if(meeting.getScheduledDaysOfWeek()==null||meeting.getScheduledDaysOfWeek().isEmpty()) {
+				long diffSec=ChronoUnit.SECONDS.between(LocalDateTime.now(),meeting.getScheduledTime());
+				if(diffSec<=distance+5*60) 
+					CompletableFuture.runAsync(()->sendEmailNotification(meeting.getId(),meeting.getScheduledTime()));
 				else {
-					var emailTask=taskScheduler.
-							schedule(
-							   new EmailTask(meeting.getId(),meeting.getScheduledTime()),
-							   dateTime.convertToInstant(meeting.getScheduledTime().minusSeconds(distance/1000)));
-					emailTasks.put(meeting.getId(),emailTask);
+					var emailTask=new EmailTask(meeting.getId(),meeting.getScheduledTime(),meeting.getEndDate());
+					var startTime=dateTime.convertToInstant(meeting.getScheduledTime().minusSeconds(distance));
+					var scheduleTask=taskScheduler.schedule(emailTask,startTime);
+					scheduledTasks.put(meeting.getId(),scheduleTask);
 				}
 			}
 			else {
-				var beginTask=taskScheduler.schedule(
-						new BeginTask(meeting),
-						dateTime.convertToInstant(meeting.getScheduledTime().minusDays(1))
-						);
-				beginTasks.put(meeting.getId(),beginTask);
-				if(meeting.getEndDate()!=null) {
-					var endTask=taskScheduler.schedule(
-							new EndTask(meeting.getId()),
-							dateTime.convertToInstant(meeting.getEndDate())
-							);
-					endTasks.put(meeting.getId(),endTask);
-				}
+				var startTime=dateTime.convertToInstant(meeting.getScheduledTime().minusDays(1));
+				var beginTask=taskScheduler.schedule(new BeginTask(meeting),startTime);
+				scheduledTasks.put(meeting.getId(),beginTask);
 			}
 		}
 	}
-	@RabbitListener(queues="${}")
-	public void listenRabbitMQMessage() {
-		
+	@RabbitListener(queues="${rabbitmq.queue-name}")
+	public void listenRabbitMQMessage(String meetingId) {
+		removeTaskByMeetingId(meetingId);
 	}
 	public void removeTask(Meeting meeting) {
 		if(meeting.getInstanceName().equals(queueName)) {
@@ -114,30 +104,25 @@ public class SchedulerService {
 		else rabbitTemplate.convertAndSend(routingKey,meeting.getId());
 	}
 	private void removeTaskByMeetingId(String meetingId) {
-		var beginTask=beginTasks.get(meetingId);
-		if(beginTask!=null) {
-			beginTask.cancel(true);
-			beginTasks.remove(meetingId);
+		var scheduledTask=scheduledTasks.get(meetingId);
+		if(scheduledTask!=null) {
+			scheduledTask.cancel(true);
+			scheduledTasks.remove(meetingId);
 		}
-		
-		var emailTask=emailTasks.get(meetingId);
-		if(emailTask!=null) {
-			emailTask.cancel(true);
-			emailTasks.remove(meetingId);
-		}
-		
-		var endTask=endTasks.get(meetingId);
-		if(endTask!=null) {
-			endTask.cancel(true);
-			endTasks.remove(meetingId);
+	}
+	@PostConstruct
+	public void loadScheduledTasks() {
+		var meetings=meetingRepo.findMeetingsByInstanceName(queueName);
+		for(var meeting: meetings) {
+			addTask(meeting);
 		}
 	}
 	class BeginTask implements Runnable{
 		private String meetingCron;
 		private String emailCron;
-		private String meetingId;
+		private Meeting meeting;;
 		public BeginTask(Meeting meeting) {
-			this.meetingId=meeting.getId();
+			this.meeting=meeting;
 			var scheduledTime=meeting.getScheduledTime();
 			var daysOfWeek=meeting.getScheduledDaysOfWeek();
 			
@@ -155,45 +140,44 @@ public class SchedulerService {
 		@Override
 		public void run() {
 			System.out.println("Begin Task");
+			// the time when the meeting happens
 			CronTrigger meetingTrigger=new CronTrigger(meetingCron);
+			// the time when the sending email tasks happens. Sending email is 24 hours ahead the meeting
 			CronTrigger emailTrigger=new CronTrigger(emailCron);
-			var futureTask=taskScheduler.schedule(new EmailTask(meetingId,meetingTrigger),emailTrigger);
-			emailTasks.put(meetingId,futureTask);
-			beginTasks.remove(meetingId);
+			
+			var emailTask=new EmailTask(meeting.getId(),meetingTrigger,meeting.getEndDate());
+			var scheduledTask=taskScheduler.schedule(emailTask,emailTrigger);
+			scheduledTasks.remove(meeting.getId());
+			scheduledTasks.put(meeting.getId(),scheduledTask);
 		}
 	}
 	class EmailTask implements Runnable{
 		private String meetingId;
 		private CronTrigger trigger;
 		private LocalDateTime localTime;
-		public EmailTask(String meetingId,CronTrigger trigger) {
+		private LocalDateTime endTime;
+		public EmailTask(String meetingId,CronTrigger trigger,LocalDateTime endTime) {
 			this.meetingId=meetingId;
 			this.trigger=trigger;
+			this.endTime=endTime;
 		}
-		public EmailTask(String meetingId,LocalDateTime localTime) {
+		public EmailTask(String meetingId,LocalDateTime localTime,LocalDateTime endTime) {
 			this.meetingId=meetingId;
 			this.localTime=localTime;
+			this.endTime=endTime;
 		}
 		@Override
 		public void run() {
 			System.out.println("Email Task");
+			if(endTime!=null&&endTime.isBefore(LocalDateTime.now())) {
+				removeTaskByMeetingId(meetingId);
+				return;
+			}				
 			if(trigger!=null) {
 				Date time=trigger.nextExecutionTime(triggerContext);
-				localTime=time.toInstant().
-						atZone(ZoneId.systemDefault()).toLocalDateTime();
+				localTime=time.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			}
 			CompletableFuture.runAsync(()->sendEmailNotification(meetingId,localTime));
-		}
-	}
-	class EndTask implements Runnable{
-		private String meetingId;
-		public EndTask(String meetingId) {
-			this.meetingId=meetingId;
-		}
-		@Override
-		public void run() {
-			System.out.println("End Task");
-			removeTaskByMeetingId(meetingId);
 		}
 	}
 }

@@ -2,16 +2,25 @@ package com.HungTran.MeetingTeam.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.mail.MessagingException;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.HungTran.MeetingTeam.Converter.UserConverter;
@@ -45,6 +54,7 @@ public class AuthService {
 	AuthenticationManager authManager;
 	@Autowired
 	GmailService gmailService;
+	private List<String> authPlatforms=List.of("gihub","google","facebook");
 	private final Random random=new Random();
 	@Transactional
 	public void addUser(UserDTO dto) {
@@ -56,6 +66,7 @@ public class AuthService {
 		u.setRole(roleRepo.findByRoleName(Constraint.USER));
 		u.setPassword(encoder.encode(u.getPassword()));
 		u.setLastActive(LocalDateTime.now());
+		u.setProvider(Constraint.CUSTOM);
 		sendOTPcode(u);
 	}
 	public void activateUser(String email, String OTPcode) {
@@ -69,13 +80,14 @@ public class AuthService {
 		u.setIsActivated(true);
 		userRepo.save(u);
 	}
-	public UserDTO login(String email,String password) {
+	public Map.Entry<Cookie,UserDTO> login(String email, String password) {
 		Authentication authentication = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email,password));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String token=jwtProvider.generateToken(authentication);
+		var cookie=jwtProvider.generateTokenCookie(authentication);
 		CustomUserDetails userDetails=(CustomUserDetails) authentication.getPrincipal();
-		return userConverter.convertUserToDTO(userDetails.getU(), token);
+		var dto= userConverter.convertUserToDTO(userDetails.getU());
+		return new AbstractMap.SimpleImmutableEntry<>(cookie,dto);
 	}
 	public void sendOTPcode(String email) {
 		User u=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Email "+email+" does not exists"));

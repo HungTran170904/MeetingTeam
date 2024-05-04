@@ -25,6 +25,8 @@ public class MeetingTeamApplication {
  * /user/userId/addFriendRequest
  * /user/userId/deleteFriendRequest
  */
+//https://medium.com/@poojithairosha/spring-boot-3-authenticate-websocket-connections-with-jwt-tokens-2b4ff60532b6
+// https://stackoverflow.com/questions/76988421/spring-schedule-dynamically-start-and-stop-a-task
 //https://github.com/zainbinfurqan/Zego-cloud-test-flight/blob/configure-server/src/Pages/Video-Calling/index.js
 //https://docs.zegocloud.com/article/15442
 //https://stackoverflow.com/questions/49533543/spring-and-scheduled-tasks-on-multiple-instances

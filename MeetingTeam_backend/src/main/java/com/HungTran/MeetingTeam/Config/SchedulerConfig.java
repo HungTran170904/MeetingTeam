@@ -4,13 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
+import javax.sql.DataSource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Configuration
-public class ScheduledThreadPoolConfig {
+public class SchedulerConfig {
 	@Bean
 	public ThreadPoolTaskScheduler taskScheduler() {
 		var taskScheduler=new ThreadPoolTaskScheduler();
@@ -18,19 +20,9 @@ public class ScheduledThreadPoolConfig {
 		taskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler");
 		return taskScheduler;
 	}
-	@Bean("emailTasks")
-	public Map<String,ScheduledFuture<?>> emailTasks(){
+	@Bean
+	public Map<String,ScheduledFuture<?>> scheduledTasks(){
 		Map<String,ScheduledFuture<?>> emailTasks=new HashMap();
 		return emailTasks;
-	}
-	@Bean("beginTasks")
-	public Map<String,ScheduledFuture<?>> beginTasks(){
-		Map<String,ScheduledFuture<?>> beginTasks=new HashMap();
-		return beginTasks;
-	}
-	@Bean("endTasks")
-	public Map<String,ScheduledFuture<?>> endTasks(){
-		Map<String,ScheduledFuture<?>> endTasks=new HashMap();
-		return endTasks;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -31,6 +32,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableWebSecurity
 @Order(1)
 public class SecurityConfig {
+	@Value("${frontend.url}")
+	private String frontendUrl;
+	@Autowired
+	private OAuth2LoginSuccessHandler successHandler;
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -47,7 +52,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		final CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));;
+		config.setAllowedOrigins(Arrays.asList("http://localhost:3000","https://github.com","https://google.com"));;
 		config.setAllowedMethods(Arrays.asList("*"));
 		config.setAllowCredentials(true);
 		config.setAllowedHeaders(List.of("*"));
@@ -58,7 +63,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.cors(Customizer.withDefaults())
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf().disable()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
@@ -68,9 +73,10 @@ public class SecurityConfig {
 			.authorizeHttpRequests((requests) -> requests
 					.requestMatchers("/wss/**", "/**/auth/**").permitAll()
 					.requestMatchers("/**/admin/**").hasRole(Constraint.ADMIN)
-					.anyRequest().authenticated()
-			);
+					.anyRequest().authenticated())
+			.oauth2Login(oath2->{
+				oath2.loginPage("/login").successHandler(successHandler).permitAll();
+			});
 		return http.build();
 	}
 }
-// spring.mvc.pathmatch.matching-strategy=ant_path_matcher
