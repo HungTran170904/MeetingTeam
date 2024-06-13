@@ -1,15 +1,12 @@
-package com.HungTran.MeetingTeam.Config;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
-
-import javax.sql.DataSource;
+package com.HungTran.NotificationService.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 
 @Configuration
 public class SchedulerConfig {
@@ -22,7 +19,7 @@ public class SchedulerConfig {
 	}
 	@Bean
 	public Map<String,ScheduledFuture<?>> scheduledTasks(){
-		Map<String,ScheduledFuture<?>> emailTasks=new HashMap();
-		return emailTasks;
+		Map<String,ScheduledFuture<?>>scheduledTasks=new HashMap();
+		return scheduledTasks;
 	}
 }

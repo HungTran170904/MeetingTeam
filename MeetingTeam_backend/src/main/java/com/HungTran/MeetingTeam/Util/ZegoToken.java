@@ -3,8 +3,6 @@ package com.HungTran.MeetingTeam.Util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import token.src.utils.TokenServerAssistant;
-
 @Component
 public class ZegoToken {
 	@Value("${zegocloud.app-id}")

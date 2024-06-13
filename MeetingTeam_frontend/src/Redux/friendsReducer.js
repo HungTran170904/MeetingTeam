@@ -42,8 +42,21 @@ const friendsReducer=createSlice({
                                         }
                                         return friend;
                               })
+                    },
+                    updateFriends:(state, action)=>{
+                              const updatedFriend=action.payload;
+                              console.log("Redux", updatedFriend);
+                              var friendIndex=state.findIndex(f=>f.id==updatedFriend.id);
+                              if(friendIndex>=0) state[friendIndex]=updatedFriend;
+                              else state.push(updatedFriend);
+                    },
+                    deleteFriend:(state, action)=>{
+                              const friendId=action.payload;
+                              return state.filter(friend=>friend.id!=friendId);
                     }
           }
 })
-export const {loadFriends, addFriendChatMessage, updateFriendStatus, loadMoreMessages}=friendsReducer.actions;
+export const {loadFriends, addFriendChatMessage, 
+          updateFriendStatus, loadMoreMessages,
+          updateFriends,deleteFriend}=friendsReducer.actions;
 export default friendsReducer.reducer;

@@ -39,7 +39,7 @@ public class User {
 	private String phoneNumber;
 	private String OTPcode; // for change password
 	private LocalDateTime OTPtime;
-	private Boolean isActivated=false; 
+	private Boolean isActivated;
 	private LocalDateTime lastActive;
 	private String status; //ONLINE, OFFLINE
 	private String provider;

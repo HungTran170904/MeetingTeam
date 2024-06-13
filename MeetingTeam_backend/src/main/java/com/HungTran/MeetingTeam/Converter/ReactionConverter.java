@@ -15,7 +15,7 @@ import jakarta.persistence.AttributeConverter;
 
 public class ReactionConverter implements AttributeConverter<List<MessageReaction>, String> {
 	private final Logger LOGGER=LoggerFactory.getLogger(ReactionConverter.class);
-	private final ObjectMapper objectMapper=new ObjectMapper();
+	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
 	@Override
 	public String convertToDatabaseColumn(List<MessageReaction> attribute) {
 		try {	

@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Controller;
 
 import com.HungTran.MeetingTeam.Security.JwtConfig;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import com.HungTran.MeetingTeam.DTO.UserDTO;
 import com.HungTran.MeetingTeam.Service.AuthService;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.Arrays;
 import java.util.Map;
 // https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo/blob/master/react-social/src/user/oauth2/OAuth2RedirectHandler.js
 @RestController
@@ -63,6 +65,15 @@ public class AuthController {
 	public ResponseEntity<HttpStatus> sendOTPcode(
 			@RequestParam("email") String email){
 		authService.sendOTPcode(email);
+		return new ResponseEntity(HttpStatus.OK);
+	}
+	@GetMapping("/logout")
+	public ResponseEntity<HttpStatus> logout(
+			HttpServletResponse response){
+		Cookie authCookie = new Cookie(jwtConfig.header, null);
+		authCookie.setMaxAge(0);
+		authCookie.setPath("/");
+		response.addCookie(authCookie);
 		return new ResponseEntity(HttpStatus.OK);
 	}
 }

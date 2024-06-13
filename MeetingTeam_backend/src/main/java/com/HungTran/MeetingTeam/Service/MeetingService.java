@@ -14,6 +14,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import javax.mail.MessagingException;
 
+import com.HungTran.MeetingTeam.Converter.UserConverter;
+import com.HungTran.MeetingTeam.DTO.CalendarDTO;
+import com.HungTran.MeetingTeam.Util.DateTimeUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +51,8 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class MeetingService {
 	@Autowired
+	RabbitMQService rabbitMQService;
+	@Autowired
 	ZegoToken zegoToken;
 	@Autowired
 	InfoChecking infoChecking;
@@ -59,18 +68,33 @@ public class MeetingService {
 	TeamMemberRepo tmRepo;
 	@Autowired
 	UserRepo userRepo;
+	@Value("${zegocloud.app-id}")
+	String zegoAppId;
+    @Autowired
+    UserConverter userConverter;
 	@Autowired
-	SchedulerService schedulerService;
-	
-	public String generateToken(String meetingId) {
+	DateTimeUtil dateTimeUtil;
+	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
+
+	public ObjectNode generateToken(String meetingId) {
 		var meeting=meetingRepo.findById(meetingId).orElseThrow(()->new RequestException("MeetingId "+meetingId+" does not exists"));
-		if(meeting.getIsCanceled()) throw new RequestException("This meeting has been closed");
+		if(meeting.getIsCanceled()!=null&&meeting.getIsCanceled()) throw new RequestException("This meeting has been closed");
 		User u=infoChecking.getUserFromContext();
 		if(tmRepo.existsByChannelIdAndU(u,meeting.getChannelId())==0)
 			throw new PermissionException("You do not have permission to get token from this meeting");
 		String token= zegoToken.generateToken(infoChecking.getUserIdFromContext(), meetingId);
-		System.out.println("Token:"+token);
-		return token;
+		try{
+			ObjectNode jsonObject= objectMapper.createObjectNode();
+			jsonObject.put("token", token);
+			jsonObject.put("appId",zegoAppId);
+			var userDTO=userConverter.convertUserToDTO(u);
+			String userJson = objectMapper.writeValueAsString(userDTO);
+			jsonObject.put("user",userJson);
+			return jsonObject;
+		}
+		catch(Exception ex){
+			throw new RequestException("Can not parse object to json string");
+		}
 	}
 	public List<MeetingDTO> getVideoChannelMeetings(String channelId, Integer receivedMeetingNum){
 		int pageSize=infoChecking.findBestPageSize(receivedMeetingNum);
@@ -78,39 +102,43 @@ public class MeetingService {
 		Collections.reverse(meetings);
 		return meetingConverter.convertToDTOs(meetings);
 	}
-	public void createMeeting(MeetingDTO dto) {
+	public String createMeeting(MeetingDTO dto) {
 		Meeting meeting=meetingConverter.convertToMeeting(dto);
 		User u=infoChecking.getUserFromContext();
 		meeting.setCreatorId(u.getId());
+		meeting.setIsCanceled(false);
 		Team team=channelRepo.findTeamById(meeting.getChannelId());
 		if(team==null) throw new RequestException("ChannelId "+meeting.getChannelId()+" is invalid");
 		if(!tmRepo.existsByTeamAndU(team, u))
 			throw new PermissionException("You do not have permission to create a meeting from this team");
 		meeting=meetingRepo.save(meeting);
 		if(meeting.getScheduledTime()!=null) {
-			schedulerService.addTask(meeting);
+			rabbitMQService.sendAddedTaskMessage(meeting);
 		}
 		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
+		return meeting.getId();
 	}
 	public void updateMeeting(MeetingDTO dto) {
 		var meeting=meetingRepo.findById(dto.getId()).orElseThrow(()->new RequestException("MeetingId "+dto.getId()+" does not exists"));
-		if(meeting.getIsCanceled()) throw new RequestException("This meeting was canceled");
+		if(meeting.getIsCanceled())
+			throw new RequestException("This meeting was canceled");
 		if(!infoChecking.getUserIdFromContext().equals(meeting.getCreatorId()))
 			throw new PermissionException("You do not have permission to update this meeting");
 		if(dto.getScheduledTime()==null) throw new RequestException("Scheduled Time must not be null");
-		
+
+		System.out.println("Scheduled Time "+dto.getScheduledTime());
 		Team team=channelRepo.findTeamById(meeting.getChannelId());
 		meeting.setScheduledTime(dto.getScheduledTime());
 		meeting.setScheduledDaysOfWeek(dto.getScheduledDaysOfWeek());
 		meeting.setEndDate(dto.getEndDate());
-		schedulerService.addTask(meeting);
 		meeting.setTitle(dto.getTitle());
-		meeting=meetingRepo.save(meeting);
+
+		rabbitMQService.sendAddedTaskMessage(meeting);
 		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
+		meetingRepo.save(meeting);
 	}
 	public void reactMeeting(String meetingId, MessageReaction reaction) {
 		var meeting=meetingRepo.findById(meetingId).orElseThrow(()->new RequestException("MeetingId "+meetingId+" does not exists"));
-		String userId=infoChecking.getUserIdFromContext();
 		var reactions=meeting.getReactions();
 		if(reactions==null) reactions=new ArrayList();
 		int i=0;
@@ -134,11 +162,11 @@ public class MeetingService {
 			throw new PermissionException("You do not have permission to update this meeting");
 		Team team=channelRepo.findTeamById(meeting.getChannelId());
 		if(!meeting.getIsCanceled()) {
-			schedulerService.removeTask(meeting);
+			rabbitMQService.sendRemovedTaskMessage(meeting.getId());
 			meeting.setIsCanceled(true);
 		}
 		else {
-			schedulerService.addTask(meeting);
+			rabbitMQService.sendAddedTaskMessage(meeting);
 			meeting.setIsCanceled(false);
 		}
 		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
@@ -156,6 +184,25 @@ public class MeetingService {
 		else u.getCalendarMeetingIds().remove(meetingId);
 		userRepo.save(u);
 	}
+	public CalendarDTO getMeetingsOfWeek(Integer week){
+		var weekRange= dateTimeUtil.getWeekRange(week);
+		var user=infoChecking.getUserFromContext();
+		var rawMeetings=meetingRepo.getByIds(user.getCalendarMeetingIds());
+		var meetings=rawMeetings.stream().filter(m->{
+			if(m.getScheduledDaysOfWeek()==null||m.getScheduledDaysOfWeek().isEmpty()){
+				return m.getScheduledTime().isAfter(weekRange.get(0))&&
+						m.getScheduledTime().isBefore(weekRange.get(1));
+			}
+			else{
+				if(m.getScheduledTime().isAfter(weekRange.get(1))) return false;
+				if(m.getEndDate()!=null&&m.getEndDate().isBefore(weekRange.get(0))) return false;
+				return true;
+			}
+		}).toList();
+		var calendarDTO=new CalendarDTO(meetingConverter.convertToDTOs(meetings),weekRange);
+		return calendarDTO;
+	}
+	@Transactional
 	public void deleteMeeting(String meetingId) {
 		var meeting=meetingRepo.findById(meetingId).orElseThrow(()->new RequestException("MeetingId "+meetingId+" does not exists"));
 		if(!infoChecking.getUserIdFromContext().equals(meeting.getCreatorId()))
@@ -165,7 +212,12 @@ public class MeetingService {
 		map.put("channelId", meeting.getChannelId());
 		map.put("meetingId",meetingId);
 		messageTemplate.convertAndSend("/queue/"+teamId+"/deleteMeeting", map);
-		schedulerService.removeTask(meeting);
+		rabbitMQService.sendRemovedTaskMessage(meeting.getId());
 		meetingRepo.deleteById(meetingId);
+		var user=infoChecking.getUserFromContext();
+		if(user.getCalendarMeetingIds().contains(meetingId)) {
+			user.getCalendarMeetingIds().remove(meetingId);
+			userRepo.save(user);
+		}
 	}
 }

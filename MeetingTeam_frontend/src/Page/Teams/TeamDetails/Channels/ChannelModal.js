@@ -7,7 +7,9 @@ const  ChannelModal=({channel,setChannel})=>{
           }
           function handleSubmit(e){
                   e.preventDefault();
-                  updateChannel(channel);
+                  updateChannel(channel).then(res=>{
+                        setChannel(null);
+                  });
           }
           return(
                   <Modal show={true} onHide={()=>setChannel(null)}>
@@ -23,10 +25,11 @@ const  ChannelModal=({channel,setChannel})=>{
                                                           </Form.Group>
                                                           <Form.Group as={Col} controlId="type">
                                                                   <Form.Label>Type</Form.Label>
-                                                                  <Form.Select onChange={(e)=>handleOnChange(e,"type")} disabled={channel.id} defaultValue={channel.type}>
+                                                                  {channel.id?(<Form.Control type="text" disabled defaultValue={channel.type}/>):
+                                                                        (<Form.Select onChange={(e)=>handleOnChange(e,"type")} disabled={channel.id} defaultValue={channel.type}>
                                                                           <option value="TEXT_CHANNEL">TEXT_CHANNEL</option>
                                                                           <option value="VOICE_CHANNEL">VOICE_CHANNEL</option>
-                                                                  </Form.Select>
+                                                                        </Form.Select>)}
                                                           </Form.Group>
                                                   </Row>
                                                   <Row className="mb-3">

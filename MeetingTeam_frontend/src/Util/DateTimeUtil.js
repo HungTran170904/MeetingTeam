@@ -53,5 +53,16 @@ export const getDate = (inputDateTime) => {
 export const getTime = (inputDateTime) => {
           if (!inputDateTime) return null;
           let d = moment(inputDateTime);
-          return d.format('HH:mm:ss');
+          return d.format('HH:mm');
+}
+export const getHour=(num)=>{
+          if(num<=12) return `${num} AM`;
+          else return `${num-12} PM`;
+}
+export const getCalendarTime=(dateTime)=>{
+          var result="";
+          var hour=dateTime.getHours();
+          if(hour<=12) result = (hour+":"+dateTime.getMinutes()+" AM");
+          else result = ((hour-12)+":"+dateTime.getMinutes()+" PM");
+          return result;
 }

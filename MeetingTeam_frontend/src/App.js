@@ -7,6 +7,7 @@ import LoginPage from './Page/Login/LoginPage';
 import RegisterPage from './Page/Login/RegisterPage';
 import ChangePassword from './Page/Login/ChangePassword.js';
 import AccountActivation from './Page/Login/AccountActivation.js';
+import ZegoMeeting from './Page/VideoCall/ZegoMeeting.js';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
                       <Route path="/register" element={<RegisterPage/>}/>
                       <Route path="/changePassword" element={<ChangePassword/>}/>
                       <Route path="/accountActivation" element={<AccountActivation/>}/>
+                      <Route path="videoCall" element={<ZegoMeeting/>}/>
                       <Route path="/*" element={<ProtectedRouter><ClientRouter/></ProtectedRouter>}/>
                   </Routes>
             </SnackbarProvider>

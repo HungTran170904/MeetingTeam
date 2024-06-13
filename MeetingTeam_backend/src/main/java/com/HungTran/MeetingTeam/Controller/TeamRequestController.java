@@ -24,10 +24,9 @@ public class TeamRequestController {
 	@Autowired
 	TeamRequestService trService;
 	@PostMapping("/requestToJoinTeam")
-	public ResponseEntity<HttpStatus> requestToJoinATeam(
+	public ResponseEntity<String> requestToJoinATeam(
 			@RequestBody RequestMessage message){
-		trService.requestToJoinTeam(message);
-		return new ResponseEntity(HttpStatus.OK);
+		return ResponseEntity.ok(trService.requestToJoinTeam(message));
 	}
 	@GetMapping("/acceptNewMember")
 	public ResponseEntity<HttpStatus> acceptNewMember(

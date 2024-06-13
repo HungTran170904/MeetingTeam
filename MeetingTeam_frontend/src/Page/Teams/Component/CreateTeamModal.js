@@ -10,6 +10,7 @@ const CreateTeamModal=({setShow})=>{
           function handleSubmit(){
                     createTeam({teamName: teamName}).then(res=>{
                               dispatch(updateTeam(res.data));
+                              setShow(false);
                     })
           }
           return(

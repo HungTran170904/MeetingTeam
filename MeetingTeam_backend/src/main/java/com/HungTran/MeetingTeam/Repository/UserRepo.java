@@ -27,11 +27,6 @@ public interface UserRepo extends JpaRepository<User,String>{
 			+"union select fr2.friend1.id from FriendRelation fr2 where fr2.friend2.id=?1 and fr2.status='FRIEND'")
 	public List<String> getFriendIds(String userId);
 	
-	@Query("update FriendRelation set status=?1 where (friend1.id=?1 and friend2.id=?2) or (friend1.id=?2 and friend2.id=?1)")
-	@Modifying
-    @Transactional
-	public int updateFriendStatus(String status, String friendId1, String friendId2);
-	
 	@Query("select count(fr) from FriendRelation fr where ((fr.friend1.id=?1 and fr.friend2.id=?2) or (fr.friend1.id=?2 and fr.friend2.id=?1)) and fr.status='FRIEND'")
 	public int havingFriend(String userId, String friendId);
 	

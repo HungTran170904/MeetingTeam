@@ -3,6 +3,8 @@ package com.HungTran.MeetingTeam.Controller;
 
 import java.util.List;
 
+import com.HungTran.MeetingTeam.DTO.CalendarDTO;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +31,9 @@ public class MeetingController {
 	@Autowired
 	MeetingService meetingService;
 	@PostMapping("/createMeeting")
-	public ResponseEntity<HttpStatus> createMeeting(
+	public ResponseEntity<String> createMeeting(
 			@RequestBody MeetingDTO dto){
-		meetingService.createMeeting(dto);
-		return new ResponseEntity(HttpStatus.OK);
+		return ResponseEntity.ok(meetingService.createMeeting(dto));
 	}
 	@PutMapping("/updateMeeting")
 	public ResponseEntity<HttpStatus> updateMeeting(
@@ -60,6 +61,11 @@ public class MeetingController {
 		meetingService.addToCalendar(meetingId,isAdded);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+	@GetMapping("/meetingsOfWeek/{week}")
+	public ResponseEntity<CalendarDTO> getMeetingsOfWeek(
+			@PathVariable("week") Integer week){
+		return ResponseEntity.ok(meetingService.getMeetingsOfWeek(week));
+	}
 	@GetMapping("/getVideoChannelMeetings")
 	public ResponseEntity<List<MeetingDTO>> getVideoChannelMeetings(
 			@RequestParam("channelId") String channelId,
@@ -67,7 +73,7 @@ public class MeetingController {
 		return ResponseEntity.ok(meetingService.getVideoChannelMeetings(channelId,receivedMeetingNum));
 	}
 	@GetMapping("/generateToken")
-	public ResponseEntity<String> generateToken(
+	public ResponseEntity<ObjectNode> generateToken(
 			@RequestParam("meetingId") String meetingId){
 		return ResponseEntity.ok(meetingService.generateToken(meetingId));
 	}

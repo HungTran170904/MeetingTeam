@@ -7,12 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +17,6 @@ import com.HungTran.MeetingTeam.Exception.PermissionException;
 import com.HungTran.MeetingTeam.Model.Channel;
 import com.HungTran.MeetingTeam.Model.Message;
 import com.HungTran.MeetingTeam.Model.MessageReaction;
-import com.HungTran.MeetingTeam.Model.User;
 import com.HungTran.MeetingTeam.Repository.ChannelRepo;
 import com.HungTran.MeetingTeam.Repository.MessageRepo;
 import com.HungTran.MeetingTeam.Repository.TeamMemberRepo;
@@ -46,10 +40,23 @@ public class ChatService {
 	SimpMessagingTemplate messageTemplate;
 	@Autowired
 	CloudinaryService cloudinaryService;
+	UserService userService;
 	@Autowired
 	InfoChecking infoChecking;
+
+	public void broadcastMessage(Message message) {
+		if(message.getRecipientId()!=null) {
+			messageTemplate.convertAndSendToUser(message.getSenderId(),"/messages",message);
+			messageTemplate.convertAndSendToUser(message.getRecipientId(),"/messages",message);
+		}
+		else if(message.getChannelId()!=null) {
+			String teamId=channelRepo.findTeamIdById(message.getChannelId());
+			messageTemplate.convertAndSend("/queue/"+teamId+"/chat",message);
+		}
+	}
 	public void receivePublicChatMessage(Message chatMessage, MultipartFile file) {
 		String teamId=channelRepo.findTeamIdById(chatMessage.getChannelId());
+		chatMessage.setSenderId(infoChecking.getUserIdFromContext());
 		if(file!=null) {
 			chatMessage.setContent(cloudinaryService.uploadFile(file,infoChecking.getUserIdFromContext(),null));
 			String type=file.getContentType().split("/")[0];
@@ -57,7 +64,7 @@ public class ChatService {
 			else if(type.equals("video")) chatMessage.setMessageType("VIDEO");
 			else if(type.equals("audio")) chatMessage.setMessageType("AUDIO");
 			else chatMessage.setMessageType("FILE");
-			 chatMessage.setFileName(file.getOriginalFilename());
+			chatMessage.setFileName(file.getOriginalFilename());
 		}
 		var savedMess=messageRepo.save(chatMessage);
 		messageTemplate.convertAndSend("/queue/"+teamId+"/chat",savedMess);
@@ -66,6 +73,7 @@ public class ChatService {
 	public void receivePrivateChatMessage(Message chatMessage, MultipartFile file) {
 		if(chatMessage.getRecipientId()==null) 
 			throw new MessageException("RecipientId is not null");
+		chatMessage.setSenderId(infoChecking.getUserIdFromContext());
 		if(file!=null) {
 			chatMessage.setContent(cloudinaryService.uploadFile(file,infoChecking.getUserIdFromContext(),null));
 			String type=file.getContentType().split("/")[0];
@@ -116,14 +124,7 @@ public class ChatService {
 		}
 		if(i==reactions.size()&&reaction.getEmojiCode()!=null) 
 			reactions.add(reaction);
-		if(message.getRecipientId()!=null) {
-			messageTemplate.convertAndSendToUser(message.getSenderId(),"/messages",message);
-			messageTemplate.convertAndSendToUser(message.getRecipientId(),"/messages",message);
-		}
-		else if(message.getChannelId()!=null) {
-			String teamId=channelRepo.findTeamIdById(message.getChannelId());
-			messageTemplate.convertAndSend("/queue/"+teamId+"/chat",message);
-		}
+		broadcastMessage(message);
 		message.setReactions(reactions);
 		messageRepo.save(message);
 	}
@@ -138,14 +139,8 @@ public class ChatService {
 		message.setMessageType("UNSEND");
 		message.setContent(null);
 		message.setReactions(null);
-		if(message.getChannelId()!=null) {
-			String teamId=channelRepo.findTeamIdById(message.getChannelId());
-			messageTemplate.convertAndSend("/queue/"+teamId+"/chat",message);
-		}
-		else if(message.getRecipientId()!=null) {
-			messageTemplate.convertAndSendToUser(message.getSenderId(),"/messages",message);
-			messageTemplate.convertAndSendToUser(message.getRecipientId(),"/messages",message);
-		}
+		message.setVoting(null);
+		broadcastMessage(message);
 		messageRepo.save(message);
 	}
 	public void deleteMessagesByChannelId(String channelId) {

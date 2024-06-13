@@ -2,12 +2,11 @@ package com.HungTran.MeetingTeam.Util;
 
 import java.util.regex.Pattern;
 
+import com.HungTran.MeetingTeam.Model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.HungTran.MeetingTeam.Model.User;
 import com.HungTran.MeetingTeam.Security.CustomUserDetails;
 @Component
 public class InfoChecking {

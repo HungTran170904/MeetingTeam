@@ -11,7 +11,8 @@ export const AddFriendModal=({setShow})=>{
                 e.preventDefault();
                 sendFriendRequest(email, content).then(res=>{
                         let config = {variant: 'success',anchorOrigin:{ horizontal: 'center' , vertical: 'bottom'}};
-                        enqueueSnackbar("Send friend request successfully", config)
+                        enqueueSnackbar("Send friend request successfully", config);
+                        setShow(false);
                 })
                 .catch(err=>{
                         let config = {variant: 'error',anchorOrigin:{ horizontal: 'center' , vertical: 'bottom'}};

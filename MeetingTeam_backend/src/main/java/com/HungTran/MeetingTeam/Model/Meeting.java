@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import lombok.Builder;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 
 import com.HungTran.MeetingTeam.Converter.SetStringConverter;
@@ -28,7 +30,8 @@ public class Meeting {
 	@UuidGenerator
 	private String id;
 	private LocalDateTime createdAt;
-	private Boolean isCanceled=false;
+	@Column(nullable = false)
+	private Boolean isCanceled;
 	private String title;
 	@Column(nullable = false)
 	private String channelId;
@@ -36,7 +39,7 @@ public class Meeting {
 	private String creatorId;
 	private LocalDateTime scheduledTime;
 	private LocalDateTime endDate;
-	private String instanceName;
+	private Boolean isActive;
 	@Column
 	@Convert(converter=IntegerSetConverter.class)
 	private Set<Integer> scheduledDaysOfWeek;
@@ -44,9 +47,6 @@ public class Meeting {
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter=SetStringConverter.class)
 	private Set<String> emailsReceivedNotification;
-	
-	@OneToMany(mappedBy="meetingId", fetch=FetchType.LAZY)
-	private List<MeetingMessage> messages;
 	
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter=ReactionConverter.class)

@@ -22,7 +22,7 @@ const TeamsPage=()=>{
           function handle3DotButton(e){
             e.preventDefault();
             setChannelInfo(prev=>{
-                return {teamIndex: prev.teamIndex,channelIndex:-1};
+                return {teamIndex: prev.teamIndex,channelIndex:-1, tabIndex:0};
             })
           }
           let team=null;
@@ -86,7 +86,7 @@ const TeamsPage=()=>{
                                             <TextChannel team={team} channel={channel} channelInfo={channelInfo}/>}
                                         {channel&&channel.type=="VOICE_CHANNEL"&&
                                             <VideoChannel team={team} channel={channel} channelInfo={channelInfo}/>}
-                                        {channel==null&&<TeamDetails team={team}/>}
+                                        {channel==null&&<TeamDetails team={team} channelInfo={channelInfo} setChannelInfo={setChannelInfo}/>}
                                 </div>}
                             </div>
                         </div>

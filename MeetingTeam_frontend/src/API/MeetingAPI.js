@@ -14,6 +14,9 @@ export const registerEmailNotification=(meetingId, receiveEmail)=>{
 export const addToCalendar=(meetingId, isAdded)=>{
           return AxiosService.get(url+"/addToCalendar?meetingId="+meetingId+"&isAdded="+isAdded);
 }
+export const getMeetingsOfWeek=(week)=>{
+          return AxiosService.get(url+"/meetingsOfWeek/"+week);
+}
 export const getVideoChannelMeetings=(channelId,receivedMeetingNum)=>{
           return AxiosService.get(url+"/getVideoChannelMeetings?channelId="+channelId+"&receivedMeetingNum="+receivedMeetingNum)
 }

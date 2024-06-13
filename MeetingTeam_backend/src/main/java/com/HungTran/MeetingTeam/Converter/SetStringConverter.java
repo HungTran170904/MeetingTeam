@@ -5,14 +5,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.HungTran.MeetingTeam.Exception.RequestException;
-import com.HungTran.MeetingTeam.Model.MessageReaction;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.AttributeConverter;
 
 public class SetStringConverter implements AttributeConverter<Set<String>,String>{
-	private final ObjectMapper objectMapper=new ObjectMapper();
+	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
 	@Override
 	public String convertToDatabaseColumn(Set<String> attribute) {
 		try {

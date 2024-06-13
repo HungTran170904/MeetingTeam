@@ -1,26 +1,33 @@
 import { useDispatch, useSelector } from "react-redux";
-import { addFriendChatMessage, loadFriends, updateFriendStatus} from "../Redux/friendsReducer.js";
-import { connectWebsocket, disconnect, stompClient, subscribeToNewTopic, unsubscribeByTeamId} from "../Util/WebSocketService.js";
+import { addFriendChatMessage, deleteFriend, loadFriends, updateFriendStatus, updateFriends} from "../Redux/friendsReducer.js";
+import { connectWebsocket, disconnect, subscribeToNewTopic, unsubscribeByTeamId} from "../Util/WebSocketService.js";
 import { getJoinedTeams } from "../API/TeamAPI.js";
 import {addTeamChatMessage, deleteMeeting, deleteTeam, loadTeams, removeChannel, updateChannels, updateMeetings, updateMembers, updateTeam} from "../Redux/teamsReducer.js";
 import { getFriends, getUserInfo } from "../API/UserAPI.js";
 import { loadUser } from "../Redux/userReducer.js";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const DataLoading=({children})=>{
   const dispatch=useDispatch();
   const user=useSelector(state=>state.user);
   const teams=useSelector(state=> state.teams)
-  const [isConnected, setIsConnected]=useState(false);
+  
   useEffect(()=>{
+      connectWebsocket();
       return disconnect;
   },[])
-  useEffect(()=>{
+  /*useEffect(()=>{
     const onConnected=()=>{
         setIsConnected(stompClient.connected);
     }
-    connectWebsocket(onConnected);
-  },[])
+    const onError=()=>{
+      console.log("Reconnect");
+      setTimeout(()=>{
+        connectWebsocket(onConnected, onError);
+      },2000);
+    }
+    connectWebsocket(onConnected, onError);
+  },[])*/
   useEffect(()=>{
         if(!user.id) getUserInfo().then(res=>{
           dispatch(loadUser(res.data))
@@ -33,7 +40,7 @@ const DataLoading=({children})=>{
         })
   },[])
   useEffect(()=>{
-    if(user&&isConnected){
+    if(user){
           let url="/user/"+user.id
           subscribeToNewTopic(url+"/messages",(payload)=>{
             const message=JSON.parse(payload.body);
@@ -51,23 +58,32 @@ const DataLoading=({children})=>{
               dispatch(updateTeam(newTeam));
           })
           subscribeToNewTopic(url+"/deleteTeam",(payload)=>{
-            const teamId=payload.body;
-            unsubscribeByTeamId(teamId);
-            dispatch(deleteTeam(teamId))
+              const teamId=payload.body;
+              unsubscribeByTeamId(teamId);
+              dispatch(deleteTeam(teamId));
+          })
+          subscribeToNewTopic(url+"/updateFriends",(payload)=>{
+              console.log("Updated friend subscribe",payload.body);
+              const updatedFriend=JSON.parse(payload.body);
+              dispatch(updateFriends(updatedFriend));
+          })
+          subscribeToNewTopic(url+"/deleteFriend",(payload)=>{
+              const friendId=payload.body;
+              dispatch(deleteFriend(friendId));
           })
     }
-  },[user, isConnected])
+  },[user])
   function handlePublicMessages(teamId, payload){
       const message=JSON.parse(payload.body);
-      const chatMessageTypes=new Set(["TEXT","UNSEND","IMAGE", "VIDEO","AUDIO","FILE"]);
+      const chatMessageTypes=new Set(["TEXT","UNSEND","VOTING","IMAGE", "VIDEO","AUDIO","FILE"]);
       if(chatMessageTypes.has(message.messageType)){
           dispatch(addTeamChatMessage({teamId, message}));
       }
       else if(message.messageType=="ERROR") alert(message.content);
   }
   useEffect(()=>{
-      if(teams&&isConnected){
-        teams.forEach((team, index)=>{
+      if(teams){
+        teams.forEach((team)=>{
             let url="/queue/"+team.id;
             subscribeToNewTopic(url+"/chat",(payload)=>handlePublicMessages(team.id, payload));
             subscribeToNewTopic(url+"/updateMembers", (payload)=>{
@@ -96,7 +112,7 @@ const DataLoading=({children})=>{
             })
         })
       }
-  },[teams, isConnected])
+  },[teams])
   return children;
 }
 export default DataLoading;

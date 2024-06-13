@@ -1,22 +1,17 @@
 package com.HungTran.MeetingTeam.Model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Converter.VotingConverter;
 import com.HungTran.MeetingTeam.Converter.ReactionConverter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,4 +36,7 @@ public class Message {
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter=ReactionConverter.class)
 	private List<MessageReaction> reactions;
+	@Column(columnDefinition = "TEXT")
+	@Convert(converter= VotingConverter.class)
+	private Voting voting;
 }

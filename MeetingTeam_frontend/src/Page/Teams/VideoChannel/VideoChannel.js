@@ -7,13 +7,13 @@ import {getScheduledTime, getTimeDistance } from "../../../Util/DateTimeUtil.js"
 import MeetingDropdown from "./Component/MeetingDropdown.js";
 import { ReactionDetails, ReactionList } from "../../../Component/Message/Reaction.js";
 import "./VideoChannel.css"
-import MeetingHistoryModal from "./Component/MeetingHistoryModal.js";
 import MeetingModal from "./Component/MeetingModal.js";
+import { Link} from "react-router-dom";
+
 const VideoChannel=({team, channel, channelInfo})=>{
           const dispatch=useDispatch();
           const user=useSelector(state=>state.user);
           const [reactions, setReactions]=useState(null);
-          const [meetingMessages, setMeetingMessages]=useState(null);
           const [meetingDTO, setMeetingDTO]=useState(null);
           useEffect(()=>{
                     if(!channel.meetings)
@@ -32,34 +32,32 @@ const VideoChannel=({team, channel, channelInfo})=>{
                 scheduledDaysOfWeek:new Set()
             })
           }
-          function handleMeetingNowButton(e){
-                e.preventDefault();
+          function handleMeetingNowButton(){
+                console.log("Create Meeting now");
                 createMeeting({
                   channelId:channel.id,
                   title:"new channel meeting",
+                  createdAt: new Date(),
                   scheduledTime:null,
                   scheduledEndTime:null,
                   scheduledDaysOfWeek:[]
-              }).then(alert("create meeting successfully"))
+              }).then(res=>{
+                var meetingId=res.data;
+                window.location.replace("/videoCall?meetingId="+meetingId);
+              }).catch(err=>alert(err));
           }
-          function handleJoinButton(e, meetingId){
-                  e.preventDefault();
-                  
-          }
-          function handleAddMeetingsButton(e){
-                e.preventDefault();
+          function handleAddMeetingsButton(){
                 getVideoChannelMeetings(channel.id,channel.meetings.length).then(res=>{
                     dispatch(loadChannelMeetings({channelInfo, meetings:res.data}))
-                })
+                }).catch(err=>alert(err));
           }
           if(channel.meetings)
           return(
             <>
             {reactions&&<ReactionDetails reactions={reactions} people={team.members.map(member=>member.u)} setShow={setReactions}/>}
-            {meetingMessages&&<MeetingHistoryModal meetingMessages={meetingMessages} setShow={setMeetingMessages}/>}
             {meetingDTO&&<MeetingModal meeting={meetingDTO} setShow={setMeetingDTO}/>}
           <div className="chat-history">
-                    <button class="btn btn-success" onClick={(e)=>handleAddMeetingsButton(e)}>See more meetings</button>
+                    <button class="btn btn-success" onClick={handleAddMeetingsButton}>See more meetings</button>
                     {channel.meetings.map(meeting=>{
                               let owner=null;
                               if(meeting.creatorId==user.id) owner=user;
@@ -79,6 +77,9 @@ const VideoChannel=({team, channel, channelInfo})=>{
                                                                       <small>{getTimeDistance(owner.createdAt)}</small>
                                                             </div>
                                                   </div>
+                                                  <div className="col-lg-4 status">
+                                                      {meeting.isActive?<i className="fa fa-circle online"> the meeting is happening</i>:<i className="fa fa-circle offline"> the meeting is offline</i>}
+                                                  </div>
                                         </div>
                                         <div className="card mt-3 meeting-detail">
                                                   <div className="card-body">
@@ -87,8 +88,8 @@ const VideoChannel=({team, channel, channelInfo})=>{
                                                   </div>
                                         </div>
                                         <div className="mt-3 d-flex justify-content-between align-items-center">
-                                                  {!meeting.isCanceled&&<button type="button" className="btn btn-warning">Join</button>}
-                                                  <MeetingDropdown team={team} setMeetingDTO={setMeetingDTO} meeting={meeting} setMeetingMessages={setMeetingMessages}/>
+                                                  {!meeting.isCanceled&&<Link to={"/videoCall?meetingId="+meeting.id} className="btn btn-warning">Join</Link>}
+                                                  <MeetingDropdown team={team} setMeetingDTO={setMeetingDTO} meeting={meeting}/>
                                                   <ReactionList reactions={meeting.reactions} setReactions={setReactions}/>
                                      </div>
                                  </div>
@@ -102,7 +103,7 @@ const VideoChannel=({team, channel, channelInfo})=>{
                           <i className="fa fa-video-camera" aria-hidden="true"></i> Meeting
                         </button>
                         <ul className="dropdown-menu">
-                          <li><a className="dropdown-item"><i className="fa fa-pause" aria-hidden="true"></i> Meet now</a></li>
+                          <li><a className="dropdown-item" onClick={handleMeetingNowButton}><i className="fa fa-pause" aria-hidden="true"></i> Meet now</a></li>
                           <li><a className="dropdown-item" onClick={(e)=>handleScheduleButton(e)}><i className="fa fa-calendar-o" aria-hidden="true"></i> Schedule a meeting</a></li>
                         </ul>
                       </div>

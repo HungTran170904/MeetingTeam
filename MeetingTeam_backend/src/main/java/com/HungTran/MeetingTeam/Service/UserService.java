@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Repository.FriendRelationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -39,6 +40,8 @@ import jakarta.transaction.Transactional;
 public class UserService {
 	@Autowired
 	UserRepo userRepo;
+	@Autowired
+	FriendRelationRepo frRepo;
 	@Autowired
 	UserConverter userConverter;
 	@Autowired
@@ -80,7 +83,7 @@ public class UserService {
 	@Transactional
 	public void unfriend(String friendId) {
 		String userId=infoChecking.getUserIdFromContext();
-		userRepo.updateFriendStatus("UNFRIEND",userId, friendId);
+		frRepo.updateFriendStatus("UNFRIEND",userId, friendId);
 		messageTemplate.convertAndSendToUser(friendId,"/deleteFriend",userId);
 		messageTemplate.convertAndSendToUser(userId,"/deleteFriend", friendId);
 	}

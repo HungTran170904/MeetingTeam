@@ -46,7 +46,7 @@ public class TeamRequestService {
 		var messages= requestMessRepo.getSendedRequestMessages(infoChecking.getUserIdFromContext());
 		return rmConverter.convertToDTO(messages);
 	}
-	public void requestToJoinTeam(RequestMessage message) {
+	public String requestToJoinTeam(RequestMessage message) {
 		User u=infoChecking.getUserFromContext();
 		Team team=teamRepo.findById(message.getTeam().getId()).orElseThrow(()->new RequestException("TeamId does not exists"));
 		if(team.getAutoAddMember()) {
@@ -59,11 +59,14 @@ public class TeamRequestService {
 			team=teamRepo.getTeamWithChannels(team.getId());
 			messageTemplate.convertAndSendToUser(u.getId(),"/addTeam",
 					teamConverter.convertTeamToDTO(team,team.getMembers(),team.getChannels()));
+			return "You has been added to team '"+team.getTeamName()+"'";
 		}
 		else if(!requestMessRepo.existsBySenderAndTeam(u,message.getTeam())) {	
 			message.setSender(u);
 			message=requestMessRepo.save(message);
+			return "Request has been sent successfully";
 		}
+		return "Request has been sent before! Please wait for admin of the team accepts";
 	}
 	public void acceptNewMember(String teamId,Integer messageId) {
 		String userId=infoChecking.getUserIdFromContext();
@@ -78,7 +81,7 @@ public class TeamRequestService {
 			if(sender.getStatus().equals("ONLINE")) {
 				var team=teamRepo.getTeamWithChannels(teamId);
 				team=teamRepo.getTeamWithChannels(teamId);
-				messageTemplate.convertAndSendToUser(sender.getId(),"/addTeam",
+				messageTemplate.convertAndSendToUser(sender.getId(),"/updateTeam",
 						teamConverter.convertTeamToDTO(team,team.getMembers(),team.getChannels()));
 			}
 			messageTemplate.convertAndSend("/queue/"+teamId+"/updateMembers",List.of(tmConverter.convertToDTO(tm)));

@@ -1,21 +1,50 @@
 package com.HungTran.MeetingTeam.Service;
 
+import com.HungTran.MeetingTeam.Converter.ReactionConverter;
+import com.HungTran.MeetingTeam.Model.Meeting;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class RabbitMQService {
-	@Value("${rabbitmq.queue-name}")
-	private String queueName;
-	@Value("${rabbitmq.routing-key}")
-	private String routingKey;
+	@Autowired
+	GmailService gmailService;
+	@Value("${rabbitmq.add-task-queue}")
+	private String addedTaskKey;
+	@Value("${rabbitmq.remove-task-queue}")
+	private String removedTaskKey;
 	@Value("${rabbitmq.exchange-name}")
 	private String exchange;
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	public void sendMessage(String routingKey, String message) {
-		rabbitTemplate.convertAndSend(routingKey, message);
+	private final Logger LOGGER= LoggerFactory.getLogger(ReactionConverter.class);
+
+	@RabbitListener(queues="${rabbitmq.notification-queue}")
+	public void listenRabbitMQMessage(ObjectNode jsonObject) {
+		try{
+			LOGGER.info("RabbitMQ Message Received: {meetingId:"+jsonObject.get("meetingId")+"-time:"+jsonObject.get("time"));
+			String meetingId= jsonObject.get("meetingId").asText();
+			LocalDateTime time=LocalDateTime.parse(jsonObject.get("time").asText());
+			gmailService.sendEmailNotification(meetingId,time);
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+	public void sendAddedTaskMessage(Meeting meeting){
+		LOGGER.info("Send addedTask message: "+meeting.toString());
+		rabbitTemplate.convertAndSend(exchange, addedTaskKey, meeting);
+	}
+	public void sendRemovedTaskMessage(String meetingId){
+		LOGGER.info("Send removedTask message: "+meetingId);
+		rabbitTemplate.convertAndSend(exchange, removedTaskKey, meetingId);
 	}
 }

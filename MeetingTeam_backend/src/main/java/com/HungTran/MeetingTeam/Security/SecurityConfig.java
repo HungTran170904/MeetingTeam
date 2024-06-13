@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -50,9 +51,13 @@ public class SecurityConfig {
 		return new JwtAuthenticationFilter();
 	}
 	@Bean
+	public ZegoTokenFilter zegoTokenFilter() {
+		return new ZegoTokenFilter();
+	}
+	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		final CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(Arrays.asList("http://localhost:3000","https://github.com","https://google.com"));;
+		config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));;
 		config.setAllowedMethods(Arrays.asList("*"));
 		config.setAllowCredentials(true);
 		config.setAllowedHeaders(List.of("*"));
@@ -67,9 +72,10 @@ public class SecurityConfig {
 			.csrf().disable()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
-			.exceptionHandling().authenticationEntryPoint((req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+			.exceptionHandling().authenticationEntryPoint(new AuthEntryPoint())
 			.and()
 			.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(zegoTokenFilter(), UsernamePasswordAuthenticationFilter.class)
 			.authorizeHttpRequests((requests) -> requests
 					.requestMatchers("/wss/**", "/**/auth/**").permitAll()
 					.requestMatchers("/**/admin/**").hasRole(Constraint.ADMIN)

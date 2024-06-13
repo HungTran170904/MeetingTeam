@@ -27,7 +27,7 @@ const LoginPage=()=>{
                             dispatch(loadUser(user));
                             config = {variant: 'success',anchorOrigin:anchorOrigin}
                             enqueueSnackbar('Login successfully', config);
-                            navigate("/friendPage");
+                            navigate("/friendsPage");
                         })
                         .catch((error)=>{
                             config = {variant: 'error',anchorOrigin:anchorOrigin}

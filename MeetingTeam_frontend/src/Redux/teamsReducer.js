@@ -16,7 +16,13 @@ const teamsReducer=createSlice({
                                                   let channel={...state[teamIndex].channels[channelIndex]};
                                                   if(channel.messages){
                                                             let messIndex=channel.messages.findIndex(mess=>mess.id==message.id);
-                                                            if(messIndex>-1) channel.messages[messIndex]=message;
+                                                            if(messIndex>-1){
+                                                                      if(message.messageType=="VOTING"){
+                                                                                channel.messages=channel.messages.filter(mess=>mess.id!=message.id);
+                                                                                channel.messages.push(message);
+                                                                      }                                                         
+                                                                      else channel.messages[messIndex]=message;
+                                                            } 
                                                             else channel.messages.push(message);
                                                   }
                                                   else channel.messages=[message];

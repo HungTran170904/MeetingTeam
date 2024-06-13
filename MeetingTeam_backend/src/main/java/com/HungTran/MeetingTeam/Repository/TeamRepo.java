@@ -16,8 +16,6 @@ public interface TeamRepo extends JpaRepository<Team,String>{
 	@Query("select tm.team.id from TeamMember tm where tm.u.id=?1 and tm.role!='LEAVE'")
 	public List<String> getTeamIdsByUserId(String userId);
 	
-	public String findTeamNameById(String teamId);
-	
 	@Query("select team from Team team "
 			+ "left join fetch team.members "
 			+ "where team.id in :teamIds")

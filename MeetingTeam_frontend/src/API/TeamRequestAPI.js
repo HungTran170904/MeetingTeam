@@ -1,6 +1,8 @@
 import AxiosService from "../Util/AxiosService.js";
 import { API_ENDPOINT } from "../Util/Constraints.js";
-const url=API_ENDPOINT+"/api/teamRequest"
+
+const url=API_ENDPOINT+"/api/teamRequest";
+
 export const requestToJoinAteam=(message)=>{
           return AxiosService.post(url+"/requestToJoinTeam", message, true);
 }

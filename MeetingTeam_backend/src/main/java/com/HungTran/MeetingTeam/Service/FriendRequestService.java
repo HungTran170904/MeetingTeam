@@ -70,7 +70,9 @@ public class FriendRequestService {
 		RequestMessage message=requestMessRepo.findById(requestId).orElseThrow(()->new RequestException("requestId "+requestId+" not found"));
 		if(!u.getId().equals(message.getRecipient().getId()))
 			throw new RequestException("If you want to make friend with someone, you need to send friend request to them");
-		FriendRelation fr=new FriendRelation(u,message.getSender(),"FRIEND");
+		FriendRelation fr=frRepo.findByUsers(u, message.getSender());
+		if(fr==null) fr=new FriendRelation(u,message.getSender(),"FRIEND");
+		else fr.setStatus("FRIEND");
 		frRepo.save(fr);
 		messageTemplate.convertAndSendToUser(message.getSender().getId(),"/updateFriends",userConverter.convertUserToDTO(u));
 		messageTemplate.convertAndSendToUser(message.getRecipient().getId(),"/updateFriends",userConverter.convertUserToDTO(message.getSender()));

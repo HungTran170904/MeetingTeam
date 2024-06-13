@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.HungTran.MeetingTeam.DTO.MeetingDTO;
 import com.HungTran.MeetingTeam.Model.Meeting;
-import com.HungTran.MeetingTeam.Model.MeetingMessage;
 
 @Component
 public class MeetingConverter {

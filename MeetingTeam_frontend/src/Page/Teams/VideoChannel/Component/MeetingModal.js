@@ -4,7 +4,7 @@ import { getDate, getTime } from "../../../../Util/DateTimeUtil.js";
 import { createMeeting, updateMeeting } from "../../../../API/MeetingAPI.js";
 import { useSnackbar } from "notistack";
 
-const MeetingModal=({meeting,setShow})=>{
+const MeetingModal=({meeting,setShow, noChange})=>{
          const { enqueueSnackbar } = useSnackbar();
           const [dto, setDTO]=useState({...meeting});
           const [error, setError]=useState({txtScheduledTime:null, txtEndDate: null})
@@ -15,7 +15,8 @@ const MeetingModal=({meeting,setShow})=>{
                 let value=null;
                 if(fieldName=="title"||fieldName=="endDate") value=e.target.value;
                 else if(fieldName=="scheduledTime"){
-                        value=beginDateRef.current.value+" "+beginTimeRef.current.value;
+                        value=beginDateRef.current.value+"T"+beginTimeRef.current.value;
+                        console.log("scheduledTime", value);
                 }
                 else if(fieldName=="scheduledDaysOfWeek"){
                         value=dto.scheduledDaysOfWeek;
@@ -36,10 +37,10 @@ const MeetingModal=({meeting,setShow})=>{
                 let txtScheduledTime=null, txtEndDate= null;
                 if(!dto.scheduledTime) txtScheduledTime="Schedule Time is required";
                 else {
-                        dto.scheduledTime=new Date(dto.scheduledTime);
+                        var beginDate=new Date(dto.scheduledTime);
                         if(dto.endDate){
-                               dto.endDate=new Date(dto.endDate);
-                                if(dto.endDate<dto.scheduledDate) txtEndDate="End time must be after start date";
+                              var endDate =new Date(dto.endDate);
+                                if(beginDate<endDate) txtEndDate="End time must be after start date";
                         }
                 }
                 setError({txtScheduledTime, txtEndDate})
@@ -51,11 +52,18 @@ const MeetingModal=({meeting,setShow})=>{
                         const result={...dto};
                         result.scheduledDaysOfWeek=[...dto.scheduledDaysOfWeek];
                         result.createdAt=new Date();
+                        console.log("Result", JSON.stringify(result));
                         if(!dto.id) createMeeting(result).
-                                        then(res=>showSnackbar("create new meeting successfully",true))
+                                        then(res=>{
+                                                showSnackbar("create new meeting successfully",true);
+                                                setShow(null);
+                                        })
                                         .catch(err=>showSnackbar(err.response.data,false));
                         else updateMeeting(result)
-                                .then(res=>showSnackbar("update meeting successfully", true))
+                                .then(res=>{
+                                        showSnackbar("update meeting successfully", true);
+                                        setShow(null);
+                                })
                                 .catch(err=>showSnackbar(err.response.data,false));
                 }
           }
@@ -106,9 +114,9 @@ const MeetingModal=({meeting,setShow})=>{
                                         </Row>
                             </Form>
                     </Modal.Body>
-                    <Modal.Footer>
+                    {!noChange&&<Modal.Footer>
                         <Button variant="primary" onClick={(e)=>handleSubmit(e)}>Submit</Button>
-                    </Modal.Footer>
+                    </Modal.Footer>}
         </Modal>
           )
 }

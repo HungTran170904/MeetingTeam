@@ -4,10 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,9 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.HungTran.MeetingTeam.DTO.TeamDTO;
-import com.HungTran.MeetingTeam.Model.MessageReaction;
-import com.HungTran.MeetingTeam.Model.RequestMessage;
-import com.HungTran.MeetingTeam.Model.Team;
 import com.HungTran.MeetingTeam.Service.TeamService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,7 +50,7 @@ public class TeamController {
 		return new ResponseEntity(HttpStatus.OK);
 	}
 	@GetMapping("/kickMember")
-	public ResponseEntity<HttpStatus> leaveTeam(
+	public ResponseEntity<HttpStatus> kickMember(
 			@RequestParam("teamId") String teamId,
 			@RequestParam("memberId") String memberId){
 		teamService.kickMember(teamId, memberId);

@@ -19,19 +19,12 @@ public interface TeamMemberRepo extends JpaRepository<TeamMember,String> {
 			+ "tm.team.id in (select c.team.id from Channel c where c.id=?2)")
 	public int existsByChannelIdAndU(User u, String channelId);
 	
-	public List<TeamMember> findByTeam(Team team);
-	
 	@Query("select tm from TeamMember tm where tm.team.id=?1 and tm.u.id=?2")
 	public TeamMember findByTeamIdAndUserId(String teamId, String userId);
-	
-	@Query("select tm.team.id from TeamMember tm where tm.u.id=?1")
-	public List<String> getTeamIdsByUserId(String userId);
+
+	@Query("select tm.u from TeamMember tm where tm.team.id=?1")
+	public List<User> findUsersByTeamId(String teamId);
 	
 	@Query("select tm.role from TeamMember tm where tm.u.id=?1 and tm.team.id=?2")
 	public String getRoleByUserIdAndTeamId(String userId, String teamId);
-	
-	@Query("delete from TeamMember tm where tm.u.id=?1 and tm.team.id=?2")
-	@Modifying
-    @Transactional
-	public int deleteTeamMember(String userId, String teamId);
 }

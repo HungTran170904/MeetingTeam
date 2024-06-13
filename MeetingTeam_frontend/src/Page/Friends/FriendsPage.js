@@ -19,6 +19,7 @@ const FriendsPage=()=>{
         }
         const chatFriend=(friends&&friends.length>0)?friends[indexChatFriend]:null;
         let filterFriends=(search==="")?friends:friends.filter(handleFilter);
+        console.log("FilterFriends",filterFriends);
           return(
                 <div className="container-fluid">
                     <div className="row clearfix">

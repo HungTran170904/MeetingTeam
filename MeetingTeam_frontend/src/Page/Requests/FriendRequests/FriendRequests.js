@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getFriendRequests } from "../../../API/FriendRequestAPI.js";
 import { addFriendRequest, deleteFriendRequest, loadFriendRequests } from "../../../Redux/friendRequestsReducer.js";
-import { stompClient, subscribeToNewTopic } from "../../../Util/WebSocketService.js";
+import {subscribeToNewTopic } from "../../../Util/WebSocketService.js";
 import RecievedRequests from "./ReceivedRequests/ReceivedRequests.js";
 
 const FriendRequests=()=>{
@@ -23,7 +23,7 @@ const FriendRequests=()=>{
           },[])
           useEffect(()=>{
             const url="/user/"+user.id;
-            if(friendRequests&&stompClient){
+            if(friendRequests){
                 subscribeToNewTopic(url+"/addFriendRequest",(payload)=>{
                     const request=JSON.parse(payload.body);
                     dispatch(addFriendRequest(request));
@@ -33,7 +33,7 @@ const FriendRequests=()=>{
                     dispatch(deleteFriendRequest(requestId));
                 })
             }
-          },[friendRequests, stompClient])
+          },[friendRequests])
           return(
                 <div className="chat">
                     <div className="chat-header clearfix">

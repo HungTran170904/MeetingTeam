@@ -27,3 +27,6 @@ export const activateUser=(email, OTPcode)=>{
 export const sendOTPcode=(email)=>{
           return AxiosService.get(url+"/sendOTPcode?email="+email);
 }
+export const logout=()=>{
+          return AxiosService.get(url+"/logout");
+}

@@ -4,22 +4,24 @@ import { WEBSOCKET_ENDPOINT } from "./Constraints.js";
 import Cookies from "js-cookie";
 
 let sock=null;
-export let stompClient=null;
-export let subscriptions = {};
+let stompClient=null;
+let subscriptions = {};
 const url="/api/socket"
-export const connectWebsocket = (onConnected) => {
-    if(!sock&&!stompClient){
-      sock=new SockJS(WEBSOCKET_ENDPOINT)
-      stompClient = Stomp.over(sock);
-      stompClient.debug=(str)=>console.log(str);
-      stompClient.connect({Authorization: Cookies.get("Authorization")}, onConnected, onError);
-    }
+export const connectWebsocket = () => {
+      if(sock==null) sock=new SockJS(WEBSOCKET_ENDPOINT);
+      if(stompClient==null){
+        stompClient = Stomp.over(sock);
+        stompClient.debug=(str)=>console.log(str);
+        stompClient.connect({Authorization: Cookies.get("Authorization")}, onConnected, onError);
+      }
 };
-
-const onError = (error) => {
-          console.log('Error:', error);
-};
-
+const onConnected=()=>{
+    console.log("Connect websocket successfully");
+}
+const onError=()=>{
+    console.log("Reconnect websocket");
+    setTimeout(connectWebsocket,3000);
+}
 export const disconnect = () => {
           if (stompClient&&stompClient.connected) {
             stompClient.disconnect();
@@ -28,14 +30,15 @@ export const disconnect = () => {
           console.log('Disconnected');
 };
 export const subscribeToNewTopic=(newTopic, onMessageReceived)=>{
-          if (stompClient&&stompClient.connected) {
-                  if(!subscriptions[newTopic]){
-                    subscriptions[newTopic]=stompClient.subscribe(newTopic, onMessageReceived);
-                    console.log("Subscriptions topic", subscriptions);
-                  }
-          } else {
-            console.log("Cannot subscribe to topic "+newTopic);
-          }
+          const recInterval=setInterval(()=>{
+              if (stompClient&&stompClient.connected) {
+                if(!subscriptions[newTopic]){
+                  subscriptions[newTopic]=stompClient.subscribe(newTopic, onMessageReceived);
+                  console.log("Subscriptions topic", subscriptions);
+                }
+                clearInterval(recInterval);
+              }
+          },2000);
 }
 export const unsubscribeTopic=(topic)=>{
   if(subscriptions[topic]){

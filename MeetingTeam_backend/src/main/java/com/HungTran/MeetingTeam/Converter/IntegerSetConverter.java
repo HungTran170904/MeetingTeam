@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 
 public class IntegerSetConverter implements AttributeConverter<Set<Integer>, String>{
-	private final ObjectMapper objectMapper=new ObjectMapper();
+	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
 	@Override
 	public String convertToDatabaseColumn(Set<Integer> attribute) {
 		try {

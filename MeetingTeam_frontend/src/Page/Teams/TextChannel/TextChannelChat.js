@@ -11,6 +11,10 @@ import { sendPublicMessage } from "../../../Util/WebSocketService.js";
 import { getTextChannelMessages, sendFileMessage } from "../../../API/ChatAPI.js";
 import { loadMoreMessages, updateTeamChatMessages} from "../../../Redux/teamsReducer.js";
 import Avatar from "../../../Component/Avatar/Avartar.js";
+import Voting from "../../../Component/Voting/Voting.js";
+import VotingModal from "../../../Component/Voting/VotingModal.js";
+import VoteDetailModal from "../../../Component/Voting/VoteDetailsModal.js";
+import CreateVoteModal from "../../../Component/Voting/CreateVoteModal.js";
 
 const TextChannel=({team, channel, channelInfo})=>{
             const dispatch=useDispatch();
@@ -19,6 +23,7 @@ const TextChannel=({team, channel, channelInfo})=>{
             const [replyMessage, setReplyMessage]=useState(null);
             const [showEmojiPicker, setShowEmojiPicker]=useState(false);
             const [reactions, setReactions]=useState(null);
+            const [showVoting, setShowVoting]=useState({type:0, message:null});
             useEffect(()=>{
                 if(!channel.messages)
                     getTextChannelMessages(0, channel.id).then(res=>{
@@ -43,6 +48,7 @@ const TextChannel=({team, channel, channelInfo})=>{
           }
           function handleAddMessagesButton(e){
                 e.preventDefault();
+                let limit=channel.messages?channel.messages.length:0;
                 getTextChannelMessages(channel.messages.length, channel.id).then(res=>{
                     dispatch(loadMoreMessages({channelInfo: channelInfo, messages: res.data}))
                 })
@@ -63,8 +69,11 @@ const TextChannel=({team, channel, channelInfo})=>{
           return(
           <>
                     {reactions&&<ReactionDetails reactions={reactions} people={team.members.map(member=>member.u)} setShow={setReactions}/>}
+                    {showVoting.type==1&&<VotingModal message={showVoting.message} setShow={setShowVoting}/>}
+                    {showVoting.type==2&&<VoteDetailModal message={showVoting.message} setShow={setShowVoting} team={team}/>}
+                    {showVoting.type==3&&<CreateVoteModal setShow={setShowVoting} channel={channel}/>}
                     <div className="chat-history">
-                        <button class="btn btn-success" onClick={(e)=>handleAddMessagesButton(e)}>See more messages</button>
+                        <button className="btn btn-success" onClick={(e)=>handleAddMessagesButton(e)}>See more messages</button>
                         <ul className="m-b-0">
                             {channel.messages&&channel.messages.map((message)=>{
                                 let parentMessage=null;
@@ -76,9 +85,17 @@ const TextChannel=({team, channel, channelInfo})=>{
                                         if(parentMessage.content.length>61) parentMessage.content=parentMessage.content.substring(0,60)+"...";
                                         }
                                     }
-                                    if(message.senderId!=user.id){
-                                        const senderIndex=team.members.findIndex((member)=>member.u.id==message.senderId);
-                                        const sender=team.members[senderIndex].u;
+                                    if(message.messageType=="VOTING"){
+                                        if(message.notShow) return;
+                                        let creatorNickName=user.nickName;
+                                        if(message.senderId!=user.id){
+                                            const sender=team.members.find((member)=>member.u.id==message.senderId).u;
+                                            creatorNickName=sender.nickName;
+                                        }
+                                        return (<Voting message={message} setShow={setShowVoting} creatorNickName={creatorNickName}/>)
+                                    }
+                                    else if(message.senderId!=user.id){
+                                        const sender=team.members.find((member)=>member.u.id==message.senderId).u;
                                             return(
                                                 <li className="clearfix" key={message.id}>
                                                     <div className="message-data text-begin">
@@ -125,6 +142,9 @@ const TextChannel=({team, channel, channelInfo})=>{
                                     <div className="col-lg-auto">
                                            <button className="btn btn-outline-warning" onClick={(e)=>setShowEmojiPicker(prev=>!prev)}><i className="fa fa-smile-o"></i></button>
                                             {showEmojiPicker&&<EmojiPicker onEmojiClick={(emojiData, e)=>handleEmojiPicker(emojiData, e)}/>}
+                                    </div>
+                                    <div className="col-lg-auto">
+                                           <button className="btn btn-outline-info" onClick={(e)=>setShowVoting({type:3, message:null})}><i className="fa fa-check-square"></i></button>
                                     </div>
                                 </div>
                                 {replyMessage&&<ReplyAlert replyMessage={replyMessage} setReplyMessage={setReplyMessage}/>}

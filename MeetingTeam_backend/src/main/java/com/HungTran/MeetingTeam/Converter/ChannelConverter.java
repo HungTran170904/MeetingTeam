@@ -30,6 +30,7 @@ public class ChannelConverter {
 		Channel channel=new Channel();
 		channel.setId(dto.getId());
 		channel.setChannelName(dto.getChannelName());
+		channel.setDescription(dto.getDescription());
 		channel.setType(dto.getType());
 		return channel;
 	}

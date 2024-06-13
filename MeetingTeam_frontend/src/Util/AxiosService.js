@@ -5,33 +5,38 @@ class AxiosService{
                     const instance=axios.create();
                     instance.interceptors.response.use(this.handleSuccess, this.handleError);
                     this.instance=instance;
+                    this.isTokenExpired=false;
           }
-          handleSuccess(res){
+          handleSuccess=(res)=>{
+                    this.isTokenExpired=false;
                     return res;
           }
-          handleError(err){
-                    console.log("Axios Error", err);    
-                    const res=err.response;             
-                    if(res&&res.status==401&&res.data=="JWT was exprired or incorrect"){
-                              alert("Token has been expired. Please login again")
-                              window.location.replace("/login")
+          handleError=(err)=>{   
+                    const res=err.response;         
+                    if(res&&res.status==401&&res.data=="JWT expired"){
+                              console.log("This", this);
+                              if(!this.isTokenExpired){
+                                        this.isTokenExpired=true;
+                                        window.location.replace("/login");                            
+                                        alert("Token has been expired. Please login again");
+                              }
                     }
-                    return Promise.reject(err);
+                    else return Promise.reject(err);
           }
-          get(url){
+          get=(url)=>{
                     return this.instance.get(url,{withCredentials: true})
           }
-          post(url, body, isJSON){
+          post=(url, body, isJSON)=>{
                    if(isJSON) return this.instance.post(url, body,{
                                         headers: {"Content-Type":"application/json"},
                                         withCredentials: true
                                         });
                     else return this.instance.post(url, body,{withCredentials: true});
           }
-          put(url, body){
+          put=(url, body)=>{
                     return this.instance.put(url,body,{withCredentials: true})
           }
-          delete(url){
+          delete=(url)=>{
                     return this.instance.delete(url,{withCredentials: true});
           }
 }

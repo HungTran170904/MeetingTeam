@@ -40,8 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 				break;
 			}
 		}
-		System.out.println("Url is "+request.getRequestURL()+"-Cookie:"+token);
-		if(token==null||!token.startsWith(jwtConfig.prefix)||request.getRequestURL().indexOf("/api/auth")>0) {
+		System.out.println("Url is "+request.getRequestURL());
+		if(token==null||!token.startsWith(jwtConfig.prefix)) {
 			chain.doFilter(request, response);
 			return;
 		}
@@ -54,4 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
          chain.doFilter(request, response);
 	}
 
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		String path=request.getRequestURI();
+		return path.startsWith("/api/auth")||path.startsWith("/api/zegocloud");
+	}
 }

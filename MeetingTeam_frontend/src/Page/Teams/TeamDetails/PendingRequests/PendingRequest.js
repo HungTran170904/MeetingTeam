@@ -8,7 +8,6 @@ const PendingRequest=({team})=>{
           const [requests, setRequests]=useState([]);
           const [searchTerm, setSearchTerm]=useState("");
           const [search, setSearch]=useState("");
-          const user=useSelector(state=>state.user);
           useEffect(()=>{
                     getTeamRequestMessages(team.id).then(res=>{
                               setRequests(res.data);
@@ -32,8 +31,6 @@ const PendingRequest=({team})=>{
                               })
                     })
           }
-          let roleOfUser=team.members.filter(member=>member.u.id==user.id)[0].role;
-          if(roleOfUser!="LEADER"&&roleOfUser!="DEPUTY") return(<div></div>);
           let filterRequests=(search==="")?requests:requests.filter(handleFilter);
           return(
           <div className="tablePage">

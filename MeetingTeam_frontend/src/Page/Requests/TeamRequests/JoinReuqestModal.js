@@ -11,7 +11,10 @@ const JoinRequestModal=({setShow})=>{
                           team: {id: teamId},
                           content: content,
                           createdAt: new Date()
-                  }).then(res=>alert("Request has been sent successfully"))
+                  }).then(res=>{
+                        alert(res.data);
+                        setShow(false);
+                })
                   .catch(err=>alert("There is an error when sending request"))
           }
           return(

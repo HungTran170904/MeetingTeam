@@ -1,0 +1,11 @@
+.meeting-info{
+          margin-top: 6px;
+}
+.time-info{
+          margin-top: 3px;
+          font-size: 14px;
+}
+.schedule-table table thead th {
+          background-color: #86d4f5 ;
+          color: #fff;
+}  

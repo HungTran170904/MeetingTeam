@@ -19,7 +19,7 @@ public interface ChannelRepo extends JpaRepository<Channel, String>{
 	
 	@Query("select channel.team.teamName from Channel channel where channel.id=?1")
 	public String findTeamNameById(String channelId);
-	
-	@Query("select channel from Channel channel where channel.team=?1")
-	public List<Channel> findByTeam(Team team);
+
+	@Query("select m.id from Meeting m where m.channelId=?1")
+	public List<String> getMeetingIdsById(String channelId);;
 }
