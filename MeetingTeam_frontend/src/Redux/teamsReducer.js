@@ -18,6 +18,7 @@ const teamsReducer=createSlice({
                                                             let messIndex=channel.messages.findIndex(mess=>mess.id==message.id);
                                                             if(messIndex>-1){
                                                                       if(message.messageType=="VOTING"){
+                                                                                console.log("Voting message",message);
                                                                                 channel.messages=channel.messages.filter(mess=>mess.id!=message.id);
                                                                                 channel.messages.push(message);
                                                                       }                                                         

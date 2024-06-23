@@ -50,6 +50,7 @@ const UserSettings=()=>{
                     e.preventDefault()
                     if(validatePassword(updatedUser)){
                               delete updatedUser.confirmPassword;
+                              updatedUser.calendarMeetingIds=null;
                               updateUser(updatedUser, currentPassword, file).then(res=>{
                                        dispatch(loadUser(res.data));
                                        let config = {variant: 'success', anchorOrigin:{ horizontal: 'center' , vertical: 'bottom'}}

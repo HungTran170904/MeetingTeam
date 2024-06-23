@@ -92,7 +92,7 @@ const TextChannel=({team, channel, channelInfo})=>{
                                             const sender=team.members.find((member)=>member.u.id==message.senderId).u;
                                             creatorNickName=sender.nickName;
                                         }
-                                        return (<Voting message={message} setShow={setShowVoting} creatorNickName={creatorNickName}/>)
+                                        return (<Voting key={message.id} message={message} setShow={setShowVoting} creatorNickName={creatorNickName}/>)
                                     }
                                     else if(message.senderId!=user.id){
                                         const sender=team.members.find((member)=>member.u.id==message.senderId).u;

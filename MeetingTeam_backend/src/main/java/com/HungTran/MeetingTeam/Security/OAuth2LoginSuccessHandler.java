@@ -74,8 +74,15 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 		if(email==null) throw new RequestException("Email field of your provider account is null. Please fill it");
 		User user=userRepo.findByEmail(email).orElse(null);
 		if(user==null){
-			String name = (String) attributes.get("name");
-			String avatar_url=(String) attributes.get("avatar_url");
+			String name=null, avatar_url=null;
+			if(provider.equals(Constraint.GOOGLE)){
+				name=(String) attributes.get("name");
+				avatar_url=(String) attributes.get("picture");
+			}
+			else if(provider.equals(Constraint.GITHUB)){
+				name=(String) attributes.get("login");
+				avatar_url=(String) attributes.get("avatar_url");
+			}
 			var newUser=User.builder()
 					.email(email)
 					.nickName(name)

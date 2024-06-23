@@ -32,7 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 		String token=null;
-		var cookies=request.getCookies();
 		if(request.getCookies()!=null)
 		for(var cookie : request.getCookies()){
 			if(cookie.getName().equals(jwtConfig.header)){
@@ -48,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
 		String id=jwtProvider.getIdFromToken(token);
 		CustomUserDetails userDetails=customUserDetailsService.loadUserById(id);
-		 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
                    userDetails.getAuthorities());
          SecurityContextHolder.getContext().setAuthentication(authenticationToken);
          chain.doFilter(request, response);
@@ -57,6 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 		String path=request.getRequestURI();
-		return path.startsWith("/api/auth")||path.startsWith("/api/zegocloud");
+		if(path.startsWith("/api/auth")||path.startsWith("/api/zegocloud"))
+			return true;
+		return !path.startsWith("/api");
 	}
 }

@@ -31,7 +31,7 @@ const Members=({team})=>{
                 });
           }
           function handleLeaveButton(){
-                leaveTeam(team.id).then(res=>{
+                leaveTeam(team.id).then(()=>{
                     unsubscribeByTeamId(team.id);
                     dispatch(deleteTeam(team.id));
                     const config = {variant: 'info',anchorOrigin: {horizontal: 'center' , vertical: 'bottom'}}
@@ -66,7 +66,7 @@ const Members=({team})=>{
                                         <td>{getDateTime(member.u.lastActive)}</td>
                                         <td>{member.role}</td>
                                         <td>
-                                            {(roleOfUser.role=="LEADER")&&member.u.id!=user.id&&
+                                            {(roleOfUser.role=="LEADER")&&member.u.id===user.id&&
                                             <button type="button" className="btn btn-danger" onClick={(e)=>handleKickButton(e,member.u.id)}>Kick member</button>}
                                         </td>
                                     </tr>

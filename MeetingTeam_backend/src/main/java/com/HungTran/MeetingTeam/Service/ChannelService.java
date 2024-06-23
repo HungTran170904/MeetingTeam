@@ -5,6 +5,7 @@ import java.util.List;
 import com.HungTran.MeetingTeam.Model.User;
 import com.HungTran.MeetingTeam.Repository.UserRepo;
 import com.HungTran.MeetingTeam.Util.Constraint;
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
@@ -36,9 +37,11 @@ public class ChannelService {
 	@Autowired
 	InfoChecking infoChecking;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private ChatService chatService;
 
 	public void updateChannel(ChannelDTO dto) {
 		if(dto.getTeamId()==null) throw new RequestException("TeamId is required!");
@@ -56,14 +59,13 @@ public class ChannelService {
 				channel.setTeam(teamRepo.getById(dto.getTeamId()));
 			}
 			var savedChannel=channelRepo.save(channel);
-			messageTemplate.convertAndSend("/queue/"+dto.getTeamId()+"/updateChannels",channelConverter.convertToDTO(savedChannel));
+			socketTemplate.sendTeam(dto.getTeamId(),"/updateChannels",channelConverter.convertToDTO(savedChannel));
 		}
 		else throw new RequestException("You do not have permission to add a new channel!Contact leader or deputies of your team for help!");
 	}
 	@Transactional
 	public void deleteChannel(String channelId) {
 		Channel channel=channelRepo.findById(channelId).orElseThrow(()->new RequestException("ChannelId "+channelId+" does not exists"));
-		channelRepo.deleteById(channelId);
 		var teamId=channelRepo.findTeamIdById(channelId);
 		if(channel.getType().equals(Constraint.VOICE_CHANNEL)) {
 			List<User> users=teamMemberRepo.findUsersByTeamId(teamId);
@@ -72,6 +74,8 @@ public class ChannelService {
 				user.getCalendarMeetingIds().removeAll(meetingIds);
 			userRepo.saveAll(users);
 		}
-		messageTemplate.convertAndSend("/queue/"+channel.getTeam().getId()+"/removeChannel", channelId);
+		chatService.deleteMessagesByChannelId(channelId);
+		channelRepo.deleteById(channelId);
+		socketTemplate.sendTeam(channel.getTeam().getId(),"/removeChannel", channelId);
 	}
 }

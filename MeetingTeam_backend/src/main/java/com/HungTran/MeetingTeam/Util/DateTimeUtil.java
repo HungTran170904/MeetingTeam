@@ -10,11 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DateTimeUtil {
-	private DateTimeFormatter formatter=DateTimeFormatter.ofPattern("HH:mm DD/MM/YYYY");
-	public Instant convertToInstant(LocalDateTime time) {
-		return time.atZone(ZoneId.systemDefault())
-				.toInstant();
-	}
+	private DateTimeFormatter formatter=DateTimeFormatter.ofPattern("HH:mm dd/MM/YYYY");
+
 	public String format(LocalDateTime time) {
 		return formatter.format(time);
 	}

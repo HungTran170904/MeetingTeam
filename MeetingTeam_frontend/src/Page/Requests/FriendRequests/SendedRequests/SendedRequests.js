@@ -21,7 +21,7 @@ const SendedRequests=()=>{
           function handleUnsendButton(e, requestId){
                     e.preventDefault();
                     deleteFriendRequest(requestId).then(res=>{
-                              setRequests(prev=>prev.filter(request=>request.id!=requestId))
+                              setRequests(prev=>prev.filter(request=>request.id!=requestId));
                     })
           }
           const handleFilter = (item) => {

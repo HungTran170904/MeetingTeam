@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class TeamService {
 	@Autowired
 	CloudinaryService cloudinaryService;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
 	@Autowired
 	UserConverter userConverter;
 	@Autowired
@@ -87,11 +88,11 @@ public class TeamService {
 			tms.add(tm);
 		}
 		List<TeamMember> savedTMs=teamMemberRepo.saveAll(tms);
-		messageTemplate.convertAndSend("/queue/"+teamId+"/updateMembers",tmConverter.convertToDTO(savedTMs));
+		socketTemplate.sendTeam(teamId,"/updateMembers",tmConverter.convertToDTO(savedTMs));
 		Team team=teamRepo.getTeamWithMembers(teamId);
 		team=teamRepo.getTeamWithChannels(teamId);
 		for(String friendId: friendIds) 
-			messageTemplate.convertAndSendToUser(friendId,"/addTeam",
+			socketTemplate.sendUser(friendId,"/addTeam",
 				teamConverter.convertTeamToDTO(team,team.getMembers(),team.getChannels()));
 	}
 	public List<TeamDTO> getJoinedTeams(){
@@ -105,7 +106,7 @@ public class TeamService {
 		TeamMember tm=teamMemberRepo.findByTeamIdAndUserId(teamId, userId);
 		tm.setRole("LEAVE");
 		teamMemberRepo.save(tm);
-		messageTemplate.convertAndSend("/queue/"+teamId+"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
+		socketTemplate.sendTeam(teamId,"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
 	}
 	public void kickMember(String teamId, String memberId) {
 		User u=infoChecking.getUserFromContext();
@@ -114,8 +115,8 @@ public class TeamService {
 		if(role.equals("LEADER")) {
 			tm.setRole("LEAVE");
 			teamMemberRepo.save(tm);
-			messageTemplate.convertAndSendToUser(memberId,"/deleteTeam",teamId);
-			messageTemplate.convertAndSend("/queue/"+teamId+"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
+			socketTemplate.sendUser(memberId,"/deleteTeam",teamId);
+			socketTemplate.sendTeam(teamId,"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
 		}
 		else throw new RequestException("You do not have permission to kick a member!Contact leader or deputies of your team for help!");
 	}
@@ -127,6 +128,6 @@ public class TeamService {
 			team.setUrlIcon(url);
 		}
 		Team savedTeam=teamRepo.save(team);
-		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateTeam",teamConverter.convertTeamToDTO(savedTeam));
+		socketTemplate.sendTeam(team.getId(),"/updateTeam",teamConverter.convertTeamToDTO(savedTeam));
 	}
 }

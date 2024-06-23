@@ -24,12 +24,12 @@ const FriendRequests=()=>{
           useEffect(()=>{
             const url="/user/"+user.id;
             if(friendRequests){
-                subscribeToNewTopic(url+"/addFriendRequest",(payload)=>{
-                    const request=JSON.parse(payload.body);
+                subscribeToNewTopic(url,"/addFriendRequest",(payload)=>{
+                    const request=payload;
                     dispatch(addFriendRequest(request));
                 })
-                subscribeToNewTopic(url+"/deleteFriendRequest",(payload)=>{
-                    const requestId=payload.body;
+                subscribeToNewTopic(url,"/deleteFriendRequest",(payload)=>{
+                    const requestId=payload;
                     dispatch(deleteFriendRequest(requestId));
                 })
             }

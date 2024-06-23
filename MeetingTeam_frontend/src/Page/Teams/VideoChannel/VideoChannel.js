@@ -57,7 +57,7 @@ const VideoChannel=({team, channel, channelInfo})=>{
             {reactions&&<ReactionDetails reactions={reactions} people={team.members.map(member=>member.u)} setShow={setReactions}/>}
             {meetingDTO&&<MeetingModal meeting={meetingDTO} setShow={setMeetingDTO}/>}
           <div className="chat-history">
-                    <button class="btn btn-success" onClick={handleAddMeetingsButton}>See more meetings</button>
+                    <button className="btn btn-success" onClick={handleAddMeetingsButton}>See more meetings</button>
                     {channel.meetings.map(meeting=>{
                               let owner=null;
                               if(meeting.creatorId==user.id) owner=user;

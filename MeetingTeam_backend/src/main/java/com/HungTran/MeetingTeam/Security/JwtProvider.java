@@ -39,6 +39,8 @@ public class JwtProvider {
 		Cookie cookie=new Cookie(jwtConfig.header,generateToken(auth));
 		cookie.setPath("/");
 		cookie.setMaxAge(jwtConfig.expiration);
+		cookie.setSecure(true);
+		cookie.setAttribute("sameSite","None");
 		return cookie;
 	}
 	public String getIdFromToken(String token) {

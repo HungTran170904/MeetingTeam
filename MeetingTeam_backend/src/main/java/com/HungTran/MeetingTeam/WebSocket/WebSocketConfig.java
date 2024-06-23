@@ -10,6 +10,15 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
+	@Value("${stomp.rabbitmq.host}")
+	private String rabbitqmHost;
+	@Value("${stomp.rabbitmq.port}")
+	private int rabbitmqPort;
+	@Value("${stomp.rabbitmq.username}")
+	private String rabbitmqUsername;
+	@Value("${stomp.rabbitmq.password}")
+	private String rabbitmqPassword;
+
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/wss").setAllowedOriginPatterns("*").withSockJS();
@@ -19,11 +28,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		registry.setApplicationDestinationPrefixes("/api/socket");
 		registry.setUserDestinationPrefix("/user");
-		registry.enableSimpleBroker("/queue", "/user");
-		/*registry.enableStompBrokerRelay("/queue", "/user")
-				.setRelayHost(rabbitmqHost)
+		registry.enableStompBrokerRelay("/queue","/topic")
+				.setRelayHost(rabbitqmHost)
 				.setRelayPort(rabbitmqPort)
-				.setSystemLogin(rabbitmqUsername)
-				.setSystemPasscode(rabbitmqPassword);*/
+				.setClientLogin(rabbitmqUsername)
+				.setClientPasscode(rabbitmqPassword);
 	}
 }
