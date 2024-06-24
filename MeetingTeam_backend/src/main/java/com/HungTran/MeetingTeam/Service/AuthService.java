@@ -90,12 +90,7 @@ public class AuthService {
 		for(int i=0;i<6;i++) otp+=random.nextInt(9);
 		u.setOTPcode(otp);
 		u.setOTPtime(LocalDateTime.now().plusMinutes(5));
-		try {
-			mailService.sendOTPMail(u.getEmail(),otp);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RequestException("There is an error!Please try again");
-		}
+		mailService.sendOTPMail(u.getEmail(),otp);
 		userRepo.save(u);
 	}
 	public void changePassword(String email, String newPassword, String OTPcode) {

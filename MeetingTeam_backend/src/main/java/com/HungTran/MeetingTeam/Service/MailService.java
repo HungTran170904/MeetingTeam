@@ -6,7 +6,7 @@ import com.HungTran.MeetingTeam.Repository.MeetingRepo;
 import com.HungTran.MeetingTeam.Util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Service
 public class MailService {
     @Autowired
-    JavaMailSender mailSender;
+    JavaMailSenderImpl mailSender;
     @Autowired
     MeetingRepo meetingRepo;
     @Autowired
@@ -28,15 +28,19 @@ public class MailService {
     public void sendMail(String to, String subject, String content) {
         try{
             var message = mailSender.createMimeMessage();
+            System.out.println("Message "+message);
             var helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(fromEmailAddress);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(content, true);
+            System.out.println("Will send");
             mailSender.send(message);
+            System.out.println("Send successfully");
         }
         catch(Exception e){
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new RequestException("Sending mail errors");
         }
     }
     public void sendOTPMail(String to,String otpCode){
