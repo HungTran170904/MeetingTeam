@@ -1,0 +1,99 @@
+version: "3.8"
+services:
+  mysql-service:
+    image: mysql
+    container_name: mysql-service
+    ports:
+      - 3308:3306
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_PORT: ${DB_PORT}
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - meeting-team-network
+  noti-broker:
+    image: rabbitmq:3.12.9-management
+    container_name: noti-broker
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - meeting-team-network
+  stomp-broker:
+    image: hungtran679/stomp-broker
+    container_name: stomp-broker
+    ports:
+      - 15673:15672
+      - 5673:5672
+      - 61613:61613
+    networks:
+      - meeting-team-network
+  backend-service:
+    image: hungtran679/mt-backend
+    depends_on:
+        - mysql-service
+        - noti-broker
+        - stomp-broker
+    ports: 
+        - "8080"
+    environment:
+        DB_HOST: mysql-service
+        DB_PORT: ${DB_PORT}
+        DB_USER: ${DB_USER}
+        DB_PASS: ${DB_PASS}
+        DB_DATABASE: ${DB_DATABASE}
+        NOTIBROKER_HOST: noti-broker
+        NOTIBROKER_PORT: 5672
+        NOTIBROKER_USER: ${NOTIBROKER_USER}
+        NOTIBROKER_PASS: ${NOTIBROKER_PASS}
+        STOMPBROKER_HOST: stomp-broker
+        STOMPBROKER_PORT: 61613
+        STOMPBROKER_USER: ${STOMPBROKER_USER}
+        STOMPBROKER_PASS: ${STOMPBROKER_PASS}
+        MAIL_USER: ${MAIL_USER}
+        MAIL_PASS: ${MAIL_PASS}
+        ZEGOCLOUD_ID: ${ZEGOCLOUD_ID}
+        ZEGOCLOUD_SECRET: ${ZEGOCLOUD_SECRET}
+        CLOUDINARY_URL: ${CLOUDINARY_URL}
+        CLOUDINARY_KEY: ${CLOUDINARY_KEY}
+        CLOUDINARY_SECRET: ${CLOUDINARY_SECRET}
+        CLOUDINARY_NAME: ${CLOUDINARY_NAME}
+        GOOGLE_ID: ${GOOGLE_ID}
+        GOOGLE_SECRET: ${GOOGLE_SECRET}
+        GITHUB_ID: ${GITHUB_ID}
+        GITHUB_SECRET: ${GITHUB_SECRET}
+        FRONTEND_URL: ${FRONTEND_URL}
+    volumes:
+      - ./MeetingTeam_backend:/app
+    networks:
+        - meeting-team-network
+  notification-service:
+      container_name: notification-service
+      image: hungtran679/mt-notification
+      depends_on:
+        - mysql-service
+        - noti-broker
+      ports: 
+        - 8081:8081
+      environment:
+        DB_HOST: mysql-service
+        DB_PORT: ${DB_PORT}
+        DB_PASS: ${DB_PASS}
+        DB_DATABASE: ${DB_DATABASE}
+        NOTIBROKER_HOST: noti-broker
+        NOTIBROKER_PORT: 5672
+        NOTIBROKER_USER: ${NOTIBROKER_USER}
+        NOTIBROKER_PASS: ${NOTIBROKER_PASS}
+      volumes:
+        - ./NotificationService:/app
+      networks:
+        - meeting-team-network
+networks:
+  meeting-team-network:
+volumes:
+  db:
+      
+
+      

@@ -23,6 +23,9 @@ const LoginPage=()=>{
                     let anchorOrigin = { horizontal: 'center' , vertical: 'bottom'}
                     if(validate){
                         login(form.email, form.password).then(res=>{
+                            const now=new Date();
+                            const tokenExpiredDate=new Date(now.getTime()+100000000);
+                            localStorage.setItem("tokenExpiredDate", tokenExpiredDate.toISOString());
                             const user=res.data;
                             dispatch(loadUser(user));
                             config = {variant: 'success',anchorOrigin:anchorOrigin}

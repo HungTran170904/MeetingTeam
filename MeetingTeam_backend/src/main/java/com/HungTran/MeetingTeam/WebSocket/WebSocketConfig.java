@@ -1,12 +1,26 @@
 package com.HungTran.MeetingTeam.WebSocket;
 
+import com.HungTran.MeetingTeam.Security.JwtConfig;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.util.WebUtils;
+
+import java.util.Map;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
@@ -18,10 +32,33 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 	private String rabbitmqUsername;
 	@Value("${stomp.rabbitmq.password}")
 	private String rabbitmqPassword;
+	@Autowired
+	JwtConfig jwtConfig;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
-		registry.addEndpoint("/wss").setAllowedOriginPatterns("*").withSockJS();
+		registry.addEndpoint("/wss").setAllowedOriginPatterns("*").withSockJS()
+				.setInterceptors(httpSessionHandshakeInterceptor());
+	}
+
+	@Bean
+	public HandshakeInterceptor httpSessionHandshakeInterceptor() {
+		return new HandshakeInterceptor() {
+			@Override
+			public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
+				if (request instanceof ServletServerHttpRequest) {
+					ServletServerHttpRequest servletServerRequest = (ServletServerHttpRequest) request;
+					HttpServletRequest servletRequest = servletServerRequest.getServletRequest();
+					Cookie token = WebUtils.getCookie(servletRequest, jwtConfig.header);
+					if(token != null) attributes.put(jwtConfig.header, token.getValue());
+					else return false;
+				}
+				return true;
+			}
+
+			@Override
+			public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Exception exception) {}
+		};
 	}
 
 	@Override

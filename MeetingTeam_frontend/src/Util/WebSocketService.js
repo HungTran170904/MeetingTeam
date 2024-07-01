@@ -1,7 +1,6 @@
 import SockJS from "sockjs-client";
 import Stomp from "stompjs";
 import { WEBSOCKET_ENDPOINT } from "./Constraints.js";
-import Cookies from "js-cookie";
 
 let sock=null;
 let stompClient=null;
@@ -12,7 +11,7 @@ export const connectWebsocket = () => {
       if(stompClient==null){
         stompClient = Stomp.over(sock);
         stompClient.debug=(str)=>console.log(str);
-        stompClient.connect({Authorization: Cookies.get("Authorization")}, onConnected, onError);
+        stompClient.connect({}, onConnected, onError);
       }
 };
 const onConnected=()=>{

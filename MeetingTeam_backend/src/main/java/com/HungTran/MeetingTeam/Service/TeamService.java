@@ -65,6 +65,7 @@ public class TeamService {
 	public TeamDTO createTeam(TeamDTO dto) {
 		User leader=infoChecking.getUserFromContext();
 		Team team=teamConverter.convertDTOToTeam(dto);
+		team.setAutoAddMember(false);
 		var savedTeam=teamRepo.save(team);
 		var member=teamMemberRepo.save(new TeamMember(leader, savedTeam, "LEADER"));
 		var generalChannel=Channel.builder()

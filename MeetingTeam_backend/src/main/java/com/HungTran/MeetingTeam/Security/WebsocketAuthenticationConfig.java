@@ -1,6 +1,7 @@
 package com.HungTran.MeetingTeam.Security;
 
 import java.util.List;
+import java.util.Map;
 
 import com.HungTran.MeetingTeam.Util.InfoChecking;
 import org.aopalliance.intercept.Interceptor;
@@ -32,6 +33,8 @@ public class WebsocketAuthenticationConfig implements WebSocketMessageBrokerConf
 	@Autowired
 	JwtProvider jwtProvider;
 	@Autowired
+	JwtConfig jwtConfig;
+	@Autowired
 	CustomUserDetailsService customUserDetailsService;
 	@Override
 	public void configureClientInboundChannel(ChannelRegistration registration) {
@@ -40,12 +43,13 @@ public class WebsocketAuthenticationConfig implements WebSocketMessageBrokerConf
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
 				StompHeaderAccessor accessor=
 						MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-				System.out.println("There is a websocket request");
 				if(StompCommand.CONNECT.equals(accessor.getCommand())) {
-					List<String> token = accessor.getNativeHeader("Authorization");
+					System.out.println("Init a websocket connection");
+					Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+					String token=sessionAttributes.get(jwtConfig.header).toString();
 					LOGGER.debug("Authorization {}", token);
 
-					String userId=jwtProvider.getIdFromToken(token.get(0));
+					String userId=jwtProvider.getIdFromToken(token);
 					CustomUserDetails userDetails=customUserDetailsService.loadUserById(userId);
 					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null,
 			                   userDetails.getAuthorities());

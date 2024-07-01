@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class MeetingDTO {
 	private String id;
 	private LocalDateTime createdAt;
-	private Boolean isCanceled;
+	private Boolean isCanceled=false;
 	private String title;
 	private String channelId;
 	private String creatorId;

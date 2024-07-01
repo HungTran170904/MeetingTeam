@@ -28,7 +28,7 @@ const RegisterPage=()=>{
                         registerUser(dto).then(res=>{
                             let config = {variant: 'success',anchorOrigin:anchorOrigin}
                             enqueueSnackbar('Register new account successfully', config);
-                            navigate("/login");
+                            navigate("/accountActivation");
                         })
                         .catch((err)=>{
                             let config = {variant: 'error',anchorOrigin:anchorOrigin}

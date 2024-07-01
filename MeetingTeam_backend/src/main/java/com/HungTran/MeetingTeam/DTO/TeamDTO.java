@@ -15,7 +15,7 @@ public class TeamDTO {
 	private String id;
 	private String teamName;
 	private String urlIcon;
-	private Boolean autoAddMember;
+	private Boolean autoAddMember=false;
 	private List<TeamMemberDTO> members;
 	private List<ChannelDTO> channels;
 }

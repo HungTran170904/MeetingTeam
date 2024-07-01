@@ -59,6 +59,7 @@ public class AuthService {
 		u.setPassword(encoder.encode(u.getPassword()));
 		u.setLastActive(LocalDateTime.now());
 		u.setProvider(Constraint.CUSTOM);
+		u.setIsActivated(false);
 		sendOTPcode(u);
 	}
 	public void activateUser(String email, String OTPcode) {
