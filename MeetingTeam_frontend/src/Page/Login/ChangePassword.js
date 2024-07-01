@@ -8,23 +8,26 @@ const ChangePassword=()=>{
           const { enqueueSnackbar } = useSnackbar();
           const [data, setData]=useState({
               email:"",
-              newPassword:"",
+              password:"",
               confirmPassword:"",
               OTPcode:""
           });
           const [error,setError]=useState({ txtEmail: null, txtPassword: null,txtConfirmPassword:null, txtOTP:null});
-          function handleChangeValue(e, fieldName){
+          function handleChangeValue(e,fieldName){
               setData(prev=>{
                 prev[fieldName]=e.target.value;
                 return prev;
               });
           }
-          function handleOTPbutton(e){
-              e.preventDefault();
+          function handleOTPbutton(){
               if (data.email.trim().length == 0) {
                 setError({txtEmail:"Email is required"});
-            }
-              sendOTPcode(data.email).catch(err=>setError({txtOTP:err.response.data}));
+              }
+              sendOTPcode(data.email).then(()=>{
+                let config = {variant: 'success',anchorOrigin:{ horizontal: 'center' , vertical: 'bottom'}}
+                enqueueSnackbar("send email successfully", config);
+              })
+              .catch(err=>setError({txtOTP:err.response.data}));
           }
           function validateData(data){
             let txtEmail=null, txtPassword=null, txtConfirmPassword=null, txtOTP=null;
@@ -43,10 +46,9 @@ const ChangePassword=()=>{
             setError({txtEmail: txtEmail, txtPassword: txtPassword,txtConfirmPassword:txtConfirmPassword, txtOTP:txtOTP})
             return !(txtEmail||txtPassword||txtConfirmPassword||txtOTP);
       }
-          function onSubmit(e){
-            e.preventDefault();
+          function onSubmit(){
             if(validateData(data)){
-              changePassword(data.email, data.newPassword, data.OTPcode).then(res=>{
+              changePassword(data.email, data.password, data.OTPcode).then(res=>{
                   let config = {variant: 'success',anchorOrigin:{ horizontal: 'center' , vertical: 'bottom'}}
                   enqueueSnackbar("Change password successfully", config);
                   navigate("/login");
@@ -66,29 +68,29 @@ const ChangePassword=()=>{
                             <h3 className="card-title text-center mb-5 fw-light fs-5">Change Password</h3>
                             <div>
                               <div className="form-floating mb-3">
-                                        <input type="email" className="form-control" id="floatingInput" name="email" onChange={(e)=>handleChangeValue(e)} placeholder="email"/>
+                                        <input type="email" className="form-control" id="floatingInput" name="email" onChange={(e)=>handleChangeValue(e,"email")} placeholder="email"/>
                                         <label htmlFor="floatingInput">Email</label>
                                         <div style={error.txtEmail ? { display: ''} : { display: 'none' }} className="error">{error.txtEmail}</div>
                               </div>
                               <div className="mb-3">
                                   <div className="input-group">
                                         <input type="text" className="form-control" placeholder="Enter OTP code" onChange={(e)=>handleChangeValue(e,"OTPcode")}/>
-                                        <button className="btn btn-success" id="otp" onClick={(e)=>handleOTPbutton(e)}>Send OTP code</button>
+                                        <button className="btn btn-success" id="otp" onClick={handleOTPbutton}>Send OTP code</button>
                                   </div>
                                   <div style={error.txtOTP ? { display: ''} : { display: 'none' }} className="error">{error.txtOTP}</div>
                               </div>
                               <div className="form-floating mb-3">
-                                        <input type="password" className="form-control" id="floatingPassword" onChange={(e)=>handleChangeValue(e)} placeholder="password"/>
+                                        <input type="password" className="form-control" id="floatingPassword" onChange={(e)=>handleChangeValue(e,"password")} placeholder="password"/>
                                         <label htmlFor="floatingPassword">New password</label>
                                         <div style={error.txtPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtPassword}</div>
                               </div>
                               <div className="form-floating mb-3">
-                                        <input type="password" className="form-control" id="floatingPassword" onChange={(e)=>handleChangeValue(e)} placeholder="confirm password"/>
+                                        <input type="password" className="form-control" id="floatingConfirmPassword" onChange={(e)=>handleChangeValue(e,"confirmPassword")} placeholder="confirm password"/>
                                         <label htmlFor="floatingPassword">Confirm password</label>
                                         <div style={error.txtConfirmPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtConfirmPassword}</div>
                               </div>
                               <div className="d-grid">
-                                <button className="btn btn-primary btn-login text-uppercase fw-bold" onClick={()=>onSubmit()}>Change password</button>
+                                <button className="btn btn-primary btn-login text-uppercase fw-bold" onClick={onSubmit}>Change password</button>
                               </div>
                             </div>
                           </div>

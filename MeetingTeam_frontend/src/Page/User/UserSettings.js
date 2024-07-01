@@ -50,6 +50,7 @@ const UserSettings=()=>{
                     e.preventDefault()
                     if(validatePassword(updatedUser)){
                               delete updatedUser.confirmPassword;
+                              updatedUser.calendarMeetingIds=null;
                               updateUser(updatedUser, currentPassword, file).then(res=>{
                                        dispatch(loadUser(res.data));
                                        let config = {variant: 'success', anchorOrigin:{ horizontal: 'center' , vertical: 'bottom'}}
@@ -93,22 +94,26 @@ const UserSettings=()=>{
                                                                                                               <label className="form-label">Birthday</label>
                                                                                                               <input type="date" className="form-control" defaultValue={user.birthday} onChange={(e)=>handleOnChange(e,"birthday")}/>
                                                                                                     </div>
-                                                                                                    <h4>Change Password</h4>
-                                                                                                    <div className="col-md-12">
-                                                                                                              <label htmlFor="currentPassword" className="form-label">Current password</label>
-                                                                                                              <input type="password" className="form-control" id="currentPassword" onChange={(e)=>handleOnChange(e,"currentPassword")} autoComplete="new-password"/>
-                                                                                                              <div style={error.txtCurrentPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtCurrentPassword}</div>
-                                                                                                    </div>
-                                                                                                    <div className="col-md-6">
-                                                                                                              <label htmlFor="newPassword" className="form-label">New password</label>
-                                                                                                              <input type="password" className="form-control" id="newPassword" onChange={(e)=>handleOnChange(e,"password")} autoComplete="new-password"/>
-                                                                                                              <div style={error.txtPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtPassword}</div>
-                                                                                                    </div>
-                                                                                                    <div className="col-md-6">
-                                                                                                              <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                                                                                                              <input type="password" className="form-control" id="confirmPassword" onChange={(e)=>handleOnChange(e,"confirmPassword")} autoComplete="new-password"/>
-                                                                                                              <div style={error.txtConfirmPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtConfirmPassword}</div>
-                                                                                                    </div>
+                                                                                                    {user.provider=="CUSTOM"&&(
+                                                                                                        <>
+                                                                                                            <h4>Change Password</h4>
+                                                                                                            <div className="col-md-12">
+                                                                                                                    <label htmlFor="currentPassword" className="form-label">Current password</label>
+                                                                                                                    <input type="password" className="form-control" id="currentPassword" onChange={(e)=>handleOnChange(e,"currentPassword")} autoComplete="new-password"/>
+                                                                                                                    <div style={error.txtCurrentPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtCurrentPassword}</div>
+                                                                                                            </div>
+                                                                                                            <div className="col-md-6">
+                                                                                                                    <label htmlFor="newPassword" className="form-label">New password</label>
+                                                                                                                    <input type="password" className="form-control" id="newPassword" onChange={(e)=>handleOnChange(e,"password")} autoComplete="new-password"/>
+                                                                                                                    <div style={error.txtPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtPassword}</div>
+                                                                                                            </div>
+                                                                                                            <div className="col-md-6">
+                                                                                                                    <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                                                                                                                    <input type="password" className="form-control" id="confirmPassword" onChange={(e)=>handleOnChange(e,"confirmPassword")} autoComplete="new-password"/>
+                                                                                                                    <div style={error.txtConfirmPassword ? { display: ''} : { display: 'none' }} className="error">{error.txtConfirmPassword}</div>
+                                                                                                            </div>
+                                                                                                    </>
+                                                                                                    )}
                                                                                           </div>
                                                                                 </div>
                                                                       </div>

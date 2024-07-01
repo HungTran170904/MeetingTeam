@@ -8,15 +8,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-import javax.mail.MessagingException;
 
 import com.HungTran.MeetingTeam.Converter.UserConverter;
 import com.HungTran.MeetingTeam.DTO.CalendarDTO;
 import com.HungTran.MeetingTeam.Util.DateTimeUtil;
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
@@ -39,12 +35,10 @@ import com.HungTran.MeetingTeam.Model.User;
 import com.HungTran.MeetingTeam.Repository.ChannelRepo;
 import com.HungTran.MeetingTeam.Repository.MeetingRepo;
 import com.HungTran.MeetingTeam.Repository.TeamMemberRepo;
-import com.HungTran.MeetingTeam.Repository.TeamRepo;
 import com.HungTran.MeetingTeam.Repository.UserRepo;
 import com.HungTran.MeetingTeam.Util.InfoChecking;
 import com.HungTran.MeetingTeam.Util.ZegoToken;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -59,7 +53,7 @@ public class MeetingService {
 	@Autowired
 	MeetingConverter meetingConverter;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
 	@Autowired
 	ChannelRepo channelRepo;
 	@Autowired
@@ -115,7 +109,7 @@ public class MeetingService {
 		if(meeting.getScheduledTime()!=null) {
 			rabbitMQService.sendAddedTaskMessage(meeting);
 		}
-		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
+		socketTemplate.sendTeam(team.getId(),"/updateMeetings",meetingConverter.convertToDTO(meeting));
 		return meeting.getId();
 	}
 	public void updateMeeting(MeetingDTO dto) {
@@ -126,7 +120,6 @@ public class MeetingService {
 			throw new PermissionException("You do not have permission to update this meeting");
 		if(dto.getScheduledTime()==null) throw new RequestException("Scheduled Time must not be null");
 
-		System.out.println("Scheduled Time "+dto.getScheduledTime());
 		Team team=channelRepo.findTeamById(meeting.getChannelId());
 		meeting.setScheduledTime(dto.getScheduledTime());
 		meeting.setScheduledDaysOfWeek(dto.getScheduledDaysOfWeek());
@@ -134,7 +127,7 @@ public class MeetingService {
 		meeting.setTitle(dto.getTitle());
 
 		rabbitMQService.sendAddedTaskMessage(meeting);
-		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
+		socketTemplate.sendTeam(team.getId(),"/updateMeetings",meetingConverter.convertToDTO(meeting));
 		meetingRepo.save(meeting);
 	}
 	public void reactMeeting(String meetingId, MessageReaction reaction) {
@@ -153,7 +146,7 @@ public class MeetingService {
 			reactions.add(reaction);
 		meeting.setReactions(reactions);
 		String teamId=channelRepo.findTeamIdById(meeting.getChannelId());
-		messageTemplate.convertAndSend("/queue/"+teamId+"/updateMeetings",meetingConverter.convertToDTO(meeting));
+		socketTemplate.sendTeam(teamId,"/updateMeetings",meetingConverter.convertToDTO(meeting));
 		meetingRepo.save(meeting);
 	}
 	public void cancelMeeting(String meetingId) {
@@ -169,7 +162,7 @@ public class MeetingService {
 			rabbitMQService.sendAddedTaskMessage(meeting);
 			meeting.setIsCanceled(false);
 		}
-		messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMeetings",meetingConverter.convertToDTO(meeting));
+		socketTemplate.sendTeam(team.getId(),"/updateMeetings",meetingConverter.convertToDTO(meeting));
 		meetingRepo.save(meeting);
 	}
 	public void registerEmailNotification(String meetingId, boolean receiveEmail) {
@@ -211,7 +204,7 @@ public class MeetingService {
 		Map<String, String> map=new HashMap();
 		map.put("channelId", meeting.getChannelId());
 		map.put("meetingId",meetingId);
-		messageTemplate.convertAndSend("/queue/"+teamId+"/deleteMeeting", map);
+		socketTemplate.sendTeam(teamId,"/deleteMeeting", map);
 		rabbitMQService.sendRemovedTaskMessage(meeting.getId());
 		meetingRepo.deleteById(meetingId);
 		var user=infoChecking.getUserFromContext();

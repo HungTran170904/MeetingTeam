@@ -39,8 +39,8 @@ const MeetingModal=({meeting,setShow, noChange})=>{
                 else {
                         var beginDate=new Date(dto.scheduledTime);
                         if(dto.endDate){
-                              var endDate =new Date(dto.endDate);
-                                if(beginDate<endDate) txtEndDate="End time must be after start date";
+                                dto.endDate =new Date(dto.endDate);
+                                if(beginDate>dto.endDate) txtEndDate="End time must be after start date";
                         }
                 }
                 setError({txtScheduledTime, txtEndDate})

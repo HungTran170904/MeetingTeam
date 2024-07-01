@@ -1,26 +1,18 @@
 package com.HungTran.MeetingTeam.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.mail.MessagingException;
-
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.HungTran.MeetingTeam.Converter.UserConverter;
@@ -53,9 +45,9 @@ public class AuthService {
 	@Autowired
 	AuthenticationManager authManager;
 	@Autowired
-	GmailService gmailService;
-	private List<String> authPlatforms=List.of("gihub","google","facebook");
+    MailService mailService;
 	private final Random random=new Random();
+
 	@Transactional
 	public void addUser(UserDTO dto) {
 		User u=userConverter.convertDTOToUser(dto);
@@ -67,6 +59,7 @@ public class AuthService {
 		u.setPassword(encoder.encode(u.getPassword()));
 		u.setLastActive(LocalDateTime.now());
 		u.setProvider(Constraint.CUSTOM);
+		u.setIsActivated(false);
 		sendOTPcode(u);
 	}
 	public void activateUser(String email, String OTPcode) {
@@ -97,12 +90,8 @@ public class AuthService {
 		String otp="";
 		for(int i=0;i<6;i++) otp+=random.nextInt(9);
 		u.setOTPcode(otp);
-		u.setOTPtime(LocalDateTime.now().plusMinutes(2));
-		try {
-			gmailService.sendEmail(u.getEmail(),"Meeting Team OTP code", otp);
-		} catch (Exception e) {
-			throw new RequestException("There is an error!Please try again");
-		}
+		u.setOTPtime(LocalDateTime.now().plusMinutes(5));
+		mailService.sendOTPMail(u.getEmail(),otp);
 		userRepo.save(u);
 	}
 	public void changePassword(String email, String newPassword, String OTPcode) {

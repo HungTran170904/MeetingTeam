@@ -20,13 +20,8 @@ public class Constraint {
 	//Channel type
 	public static final String TEXT_CHANNEL="TEXT_CHANNEL";
 	public static final String VOICE_CHANNEL="VOICE_CHANNEL";
-	// Meeting Message type
-	public static final String CREATE_ROOM="CREATE_ROOM";
-	public static final String CLOSE_ROOM="CLOSE_ROOM";
-	public static final String START_RECORD="START_RECORD";
-	public static final String END_RECORD="END_RECORD";
 	// Auth 2.0 source
 	public static final String CUSTOM="CUSTOM";
-	public static final String GIHUB="GIHUB";
+	public static final String GITHUB="GITHUB";
 	public static final String GOOGLE="GOOGLE";
 }

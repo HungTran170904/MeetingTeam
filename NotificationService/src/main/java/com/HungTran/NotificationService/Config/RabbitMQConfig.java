@@ -11,49 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMQConfig {
-	@Value("${rabbitmq.notification-queue}")
-	private String notificationQueue;
-	@Value("${rabbitmq.add-task-queue}")
-	private String addedTaskQueue;
-	@Value("${rabbitmq.remove-task-queue}")
-	private String removedTaskQueue;
-	@Value("${rabbitmq.exchange-name}")
-	private String exchange;
-
-	@Bean
-	public Queue notificationQueue() {
-		return new Queue(notificationQueue);
-	}
-	@Bean
-	public Queue addTaskQueue() {
-		return new Queue(addedTaskQueue);
-	}
-	@Bean
-	public Queue removeTaskQueue() {
-		return new Queue(removedTaskQueue);
-	}
-	@Bean
-	public TopicExchange exchange() {
-		return new TopicExchange(exchange);
-	}
-	@Bean
-	public Binding notificationBinding() {
-		return BindingBuilder.bind(notificationQueue())
-				.to(exchange())
-				.with(notificationQueue);
-	}
-	@Bean
-	public Binding addedTaskBinding() {
-		return BindingBuilder.bind(addTaskQueue())
-				.to(exchange())
-				.with(addedTaskQueue);
-	}
-	@Bean
-	public Binding removedTaskBinding() {
-		return BindingBuilder.bind(removeTaskQueue())
-				.to(exchange())
-				.with(removedTaskQueue);
-	}
 	@Bean
 	public MessageConverter converter() {
 		return new Jackson2JsonMessageConverter();

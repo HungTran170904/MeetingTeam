@@ -1,6 +1,5 @@
 import { useSelector } from "react-redux";
 import "./TeamsPage.css"
-import { Accordion } from "react-bootstrap";
 import TextChannel from "./TextChannel/TextChannelChat.js";
 import { useState } from "react";
 import Avatar from "../../Component/Avatar/Avartar.js";
@@ -9,6 +8,7 @@ import TeamDetails from "./TeamDetails/TeamDetails.js";
 import CreateTeamModal from "./Component/CreateTeamModal.js";
 import { ChannelType } from "./Component/ChannelType.js";
 import VideoChannel from "./VideoChannel/VideoChannel.js";
+
 const TeamsPage=()=>{
           const teams=useSelector(state=>state.teams);
           const [channelInfo, setChannelInfo]=useState({teamIndex:0, channelIndex:0});

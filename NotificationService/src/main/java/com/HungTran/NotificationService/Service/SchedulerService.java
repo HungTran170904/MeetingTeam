@@ -53,7 +53,7 @@ public class SchedulerService {
     }
     public void addTask(Meeting meeting) {
         removeTaskByMeetingId(meeting.getId());
-        rabbitMQService.sendMessage(meeting.getId(),LocalDateTime.now());
+        // rabbitMQService.sendMessage(meeting.getId(),LocalDateTime.now());
         if(meeting.getScheduledTime()!=null) {
             if(meeting.getScheduledDaysOfWeek()==null||meeting.getScheduledDaysOfWeek().isEmpty()) {
                 long diffSec= ChronoUnit.SECONDS.between(LocalDateTime.now(),meeting.getScheduledTime());

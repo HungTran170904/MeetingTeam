@@ -8,14 +8,13 @@ import com.HungTran.MeetingTeam.Repository.ChannelRepo;
 import com.HungTran.MeetingTeam.Repository.MessageRepo;
 import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.InfoChecking;
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class VoteService {
@@ -25,8 +24,6 @@ public class VoteService {
     ChannelRepo channelRepo;
     @Autowired
     ChatService chatService;
-    @Autowired
-    SimpMessagingTemplate messageTemplate;
     @Autowired
     private InfoChecking infoChecking;
 

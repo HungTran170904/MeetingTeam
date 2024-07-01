@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,21 +37,21 @@ public class ChatService {
 	@Autowired
 	TeamMemberRepo teamMemberRepo;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
 	@Autowired
 	CloudinaryService cloudinaryService;
-	UserService userService;
 	@Autowired
 	InfoChecking infoChecking;
 
 	public void broadcastMessage(Message message) {
 		if(message.getRecipientId()!=null) {
-			messageTemplate.convertAndSendToUser(message.getSenderId(),"/messages",message);
-			messageTemplate.convertAndSendToUser(message.getRecipientId(),"/messages",message);
+			socketTemplate.sendUser(message.getRecipientId(),"/messages", message);
+			socketTemplate.sendUser(message.getSenderId(),"/messages", message);
 		}
 		else if(message.getChannelId()!=null) {
 			String teamId=channelRepo.findTeamIdById(message.getChannelId());
-			messageTemplate.convertAndSend("/queue/"+teamId+"/chat",message);
+			socketTemplate.sendTeam(teamId,"/messages", message);
+			socketTemplate.sendTeam(teamId,"/messages",message);
 		}
 	}
 	public void receivePublicChatMessage(Message chatMessage, MultipartFile file) {
@@ -67,7 +67,7 @@ public class ChatService {
 			chatMessage.setFileName(file.getOriginalFilename());
 		}
 		var savedMess=messageRepo.save(chatMessage);
-		messageTemplate.convertAndSend("/queue/"+teamId+"/chat",savedMess);
+		socketTemplate.sendTeam(teamId,"/messages",savedMess);
 	}
 	
 	public void receivePrivateChatMessage(Message chatMessage, MultipartFile file) {
@@ -84,8 +84,8 @@ public class ChatService {
 			chatMessage.setFileName(file.getOriginalFilename());
 		}
 		var savedMess=messageRepo.save(chatMessage);
-		messageTemplate.convertAndSendToUser(savedMess.getRecipientId(),"/messages", savedMess);
-		messageTemplate.convertAndSendToUser(savedMess.getSenderId(),"/messages", savedMess);
+		socketTemplate.sendUser(savedMess.getRecipientId(),"/messages", savedMess);
+		socketTemplate.sendUser(savedMess.getSenderId(),"/messages", savedMess);
 	}
 	
 	public List<Message> getTextChannelMessages(Integer receivedMessageNum, String channelId) {

@@ -10,6 +10,9 @@ const Settings=({team})=>{
                     urlIcon: team.urlIcon
           })
           const [file, setFile]=useState(null);
+          async function copyToClipboard(){
+                await navigator.clipboard.writeText(team.id);
+          }
           function handleOnChange(e, fieldName){
                     e.preventDefault();
                     if(fieldName=="urlIcon") setFile(e.target.files[0]);
@@ -27,6 +30,15 @@ const Settings=({team})=>{
           }
           return(
                   <Form>
+                                <Row className="mb-3">
+                                        <Form.Group as={Col} sm={5} controlId="teamId">
+                                                  <Form.Label>Team Id</Form.Label>
+                                                  <Form.Control type="text" disabled defaultValue={team.id}/>
+                                                  <Button className="btn btn-light" onClick={copyToClipboard} size="sm">
+                                                        <i class="fa fa-clipboard" aria-hidden="true"></i>
+                                                    </Button>
+                                        </Form.Group>
+                              </Row>
                               <Row className="mb-3">
                                         <Form.Group as={Col} sm={5} controlId="teamName">
                                                   <Form.Label>Team Name</Form.Label>

@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.HungTran.MeetingTeam.Repository.FriendRelationRepo;
+import com.HungTran.MeetingTeam.Util.Constraint;
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -53,7 +55,8 @@ public class UserService {
 	@Autowired
 	CloudinaryService cloudinaryService;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
+
 	public UserDTO getUserInfo() {
 		return userConverter.convertUserToDTO(infoChecking.getUserFromContext());
 	}
@@ -62,7 +65,9 @@ public class UserService {
 		user.setBirthday(dto.getBirthday());
 		user.setNickName(dto.getNickName());
 		user.setPhoneNumber(dto.getPhoneNumber());
-		if(currentPassword!=null&&!currentPassword.equals("")) {
+		if(user.getProvider().equals(Constraint.CUSTOM)&&
+				currentPassword!=null&&
+				!currentPassword.equals("")) {
 			authService.checkAndUpdatePassword(currentPassword,dto.getPassword(), user);
 		}
 		if(file!=null) {
@@ -72,7 +77,7 @@ public class UserService {
 		UserDTO savedDTO=userConverter.convertUserToDTO(userRepo.save(user));
 		List<String> friendIds=userRepo.getFriendIds(user.getId());
 		for(String friendId: friendIds) {
-			messageTemplate.convertAndSendToUser(friendId,"/updateFriends",savedDTO);
+			socketTemplate.sendUser(friendId,"/updateFriends",savedDTO);
 		}
 		return savedDTO;
 	}
@@ -84,7 +89,7 @@ public class UserService {
 	public void unfriend(String friendId) {
 		String userId=infoChecking.getUserIdFromContext();
 		frRepo.updateFriendStatus("UNFRIEND",userId, friendId);
-		messageTemplate.convertAndSendToUser(friendId,"/deleteFriend",userId);
-		messageTemplate.convertAndSendToUser(userId,"/deleteFriend", friendId);
+		socketTemplate.sendUser(friendId,"/deleteFriend",userId);
+		socketTemplate.sendUser(userId,"/deleteFriend", friendId);
 	}
 }

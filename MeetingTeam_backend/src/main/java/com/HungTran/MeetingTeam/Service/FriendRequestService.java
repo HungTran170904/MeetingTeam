@@ -3,6 +3,7 @@ package com.HungTran.MeetingTeam.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class FriendRequestService {
 	@Autowired
 	UserConverter userConverter;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
 	public void friendRequest(String email, String content) {
 		User recipient=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Sorry!!Double check that the email is correct"));
 		var userId=infoChecking.getUserIdFromContext();
@@ -49,9 +50,9 @@ public class FriendRequestService {
 						.recipient(recipient)
 						.content(content)
 						.createdAt(LocalDateTime.now())
-						.build();	
-		messageTemplate.convertAndSendToUser(userId,"/addFriendRequest",message);
-		messageTemplate.convertAndSendToUser(recipient.getId(),"/addFriendRequest",message);
+						.build();
+		socketTemplate.sendUser(userId,"/addFriendRequest",message);
+		socketTemplate.sendUser(recipient.getId(),"/addFriendRequest",message);
 		requestMessRepo.save(message);
 	}
 	public List<RequestMessageDTO> getFriendRequests() {
@@ -61,8 +62,8 @@ public class FriendRequestService {
 	public void deleteFriendRequest(Integer requestId) {
 		var request=requestMessRepo.findById(requestId).orElseThrow(()->new RequestException("RequestId "+requestId+" does not exists"));
 		requestMessRepo.deleteById(requestId);
-		messageTemplate.convertAndSendToUser(request.getSender().getId(),"/deleteFriendRequest",requestId);
-		messageTemplate.convertAndSendToUser(request.getRecipient().getId(),"/deleteFriendRequest",requestId);
+		socketTemplate.sendUser(request.getSender().getId(),"/deleteFriendRequest",requestId);
+		socketTemplate.sendUser(request.getRecipient().getId(),"/deleteFriendRequest",requestId);
 	}
 	@Transactional
 	public void acceptFriend(Integer requestId) {
@@ -74,10 +75,10 @@ public class FriendRequestService {
 		if(fr==null) fr=new FriendRelation(u,message.getSender(),"FRIEND");
 		else fr.setStatus("FRIEND");
 		frRepo.save(fr);
-		messageTemplate.convertAndSendToUser(message.getSender().getId(),"/updateFriends",userConverter.convertUserToDTO(u));
-		messageTemplate.convertAndSendToUser(message.getRecipient().getId(),"/updateFriends",userConverter.convertUserToDTO(message.getSender()));
+		socketTemplate.sendUser(message.getSender().getId(),"/updateFriends",userConverter.convertUserToDTO(u));
+		socketTemplate.sendUser(message.getRecipient().getId(),"/updateFriends",userConverter.convertUserToDTO(message.getSender()));
 		requestMessRepo.deleteById(requestId);
-		messageTemplate.convertAndSendToUser(message.getSender().getId(),"/deleteFriendRequest",requestId);
-		messageTemplate.convertAndSendToUser(message.getRecipient().getId(),"/deleteFriendRequest",requestId);
+		socketTemplate.sendUser(message.getSender().getId(),"/deleteFriendRequest",requestId);
+		socketTemplate.sendUser(message.getRecipient().getId(),"/deleteFriendRequest",requestId);
 	}
 }

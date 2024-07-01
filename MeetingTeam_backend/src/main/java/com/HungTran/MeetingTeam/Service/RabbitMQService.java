@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Service
 public class RabbitMQService {
 	@Autowired
-	GmailService gmailService;
+	MailService mailService;
 	@Value("${rabbitmq.add-task-queue}")
 	private String addedTaskKey;
 	@Value("${rabbitmq.remove-task-queue}")
@@ -33,7 +33,7 @@ public class RabbitMQService {
 			LOGGER.info("RabbitMQ Message Received: {meetingId:"+jsonObject.get("meetingId")+"-time:"+jsonObject.get("time"));
 			String meetingId= jsonObject.get("meetingId").asText();
 			LocalDateTime time=LocalDateTime.parse(jsonObject.get("time").asText());
-			gmailService.sendEmailNotification(meetingId,time);
+			mailService.sendEmailNotification(meetingId,time);
 		}
 		catch(Exception ex){
 			ex.printStackTrace();

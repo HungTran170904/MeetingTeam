@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Service;
 
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class TeamRequestService {
 	@Autowired
 	TeamConverter teamConverter;
 	@Autowired
-	SimpMessagingTemplate messageTemplate;
+	SocketTemplate socketTemplate;
 	@Autowired
 	InfoChecking infoChecking;
 	@Autowired
@@ -54,16 +55,16 @@ public class TeamRequestService {
 			if(tm==null) tm=new TeamMember(u, team,"MEMBER");
 			else tm.setRole("MEMBER");
 			teamMemberRepo.save(tm);
-			messageTemplate.convertAndSend("/queue/"+team.getId()+"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
+			socketTemplate.sendTeam(team.getId(),"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
 			team=teamRepo.getTeamWithChannels(team.getId());
 			team=teamRepo.getTeamWithChannels(team.getId());
-			messageTemplate.convertAndSendToUser(u.getId(),"/addTeam",
+			socketTemplate.sendUser(u.getId(),"/addTeam",
 					teamConverter.convertTeamToDTO(team,team.getMembers(),team.getChannels()));
 			return "You has been added to team '"+team.getTeamName()+"'";
 		}
 		else if(!requestMessRepo.existsBySenderAndTeam(u,message.getTeam())) {	
 			message.setSender(u);
-			message=requestMessRepo.save(message);
+			requestMessRepo.save(message);
 			return "Request has been sent successfully";
 		}
 		return "Request has been sent before! Please wait for admin of the team accepts";
@@ -81,10 +82,10 @@ public class TeamRequestService {
 			if(sender.getStatus().equals("ONLINE")) {
 				var team=teamRepo.getTeamWithChannels(teamId);
 				team=teamRepo.getTeamWithChannels(teamId);
-				messageTemplate.convertAndSendToUser(sender.getId(),"/updateTeam",
+				socketTemplate.sendUser(sender.getId(),"/updateTeam",
 						teamConverter.convertTeamToDTO(team,team.getMembers(),team.getChannels()));
 			}
-			messageTemplate.convertAndSend("/queue/"+teamId+"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
+			socketTemplate.sendTeam(teamId,"/updateMembers",List.of(tmConverter.convertToDTO(tm)));
 			requestMessRepo.deleteById(messageId);
 		}
 		else throw new RequestException("You do not have permission to add a new member!Contact leader or deputies of your team for help!");

@@ -32,8 +32,8 @@ const TeamDetails=({team, channelInfo, setChannelInfo})=>{
                             {channelInfo.tabIndex==0&&<Members team={team}/>}
                             {channelInfo.tabIndex==1&&(roleOfUser=="LEADER"||roleOfUser=="DEPUTY")
                                 &&<PendingRequest team={team}/>}
-                            {channelInfo.tabIndex==2&&<Settings team={team}/>}
-                            {channelInfo.tabIndex==3&&<Channels team={team}/>}
+                            {channelInfo.tabIndex==2&&<Channels team={team}/>}
+                            {channelInfo.tabIndex==3&&<Settings team={team}/>}
                     </div>
            </>
           )
