@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: hungtran679/mt-backend:v2
+  repository: hungtran679/mt-backend:latest
   pullPolicy: Always
 
 imagePullSecrets: []
