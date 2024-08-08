@@ -30,7 +30,6 @@ const ZegoMeeting=()=>{
                               data.user.id, 
                               data.user.nickName
                           );
-                    console.log("KitToken",kitToken);
                     // Create instance object from Token.
                     const zp = ZegoUIKitPrebuilt.create(kitToken);
                     // start the call

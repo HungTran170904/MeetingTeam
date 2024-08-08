@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import "./Login.css";
 import { loadUser } from "../../Redux/userReducer.js";
 import { login } from "../../API/AuthAPI.js";
-import AxiosService from "../../Util/AxiosService.js";
 import { API_ENDPOINT } from "../../Util/Constraints.js";
 const LoginPage=()=>{
           const dispatch=useDispatch();
@@ -23,11 +22,9 @@ const LoginPage=()=>{
                     let anchorOrigin = { horizontal: 'center' , vertical: 'bottom'}
                     if(validate){
                         login(form.email, form.password).then(res=>{
-                            const now=new Date();
-                            const tokenExpiredDate=new Date(now.getTime()+100000000);
-                            localStorage.setItem("tokenExpiredDate", tokenExpiredDate.toISOString());
-                            const user=res.data;
-                            dispatch(loadUser(user));
+                            const loginDTO=res.data;
+                            localStorage.setItem("tokenExpiredDate", loginDTO.tokenExpiredDate);
+                            dispatch(loadUser(loginDTO.user));
                             config = {variant: 'success',anchorOrigin:anchorOrigin}
                             enqueueSnackbar('Login successfully', config);
                             navigate("/friendsPage");

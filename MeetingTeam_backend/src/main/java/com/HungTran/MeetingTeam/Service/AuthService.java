@@ -1,11 +1,10 @@
 package com.HungTran.MeetingTeam.Service;
 
 import java.time.LocalDateTime;
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
+import com.HungTran.MeetingTeam.DTO.LoginDTO;
+import com.HungTran.MeetingTeam.Security.JwtConfig;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,6 +45,8 @@ public class AuthService {
 	AuthenticationManager authManager;
 	@Autowired
     MailService mailService;
+	@Autowired
+	JwtConfig jwtConfig;
 	private final Random random=new Random();
 
 	@Transactional
@@ -73,14 +74,16 @@ public class AuthService {
 		u.setIsActivated(true);
 		userRepo.save(u);
 	}
-	public Map.Entry<Cookie,UserDTO> login(String email, String password) {
+	public Map.Entry<Cookie,LoginDTO> login(String email, String password) {
 		Authentication authentication = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email,password));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		var cookie=jwtProvider.generateTokenCookie(authentication);
 		CustomUserDetails userDetails=(CustomUserDetails) authentication.getPrincipal();
-		var dto= userConverter.convertUserToDTO(userDetails.getU());
-		return new AbstractMap.SimpleImmutableEntry<>(cookie,dto);
+		var userDTO= userConverter.convertUserToDTO(userDetails.getU());
+		var expiredDate=new Date((new Date()).getTime() + jwtConfig.expiration);
+		var loginDTO=new LoginDTO(userDTO, expiredDate);
+		return new AbstractMap.SimpleImmutableEntry<>(cookie,loginDTO);
 	}
 	public void sendOTPcode(String email) {
 		User u=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Email "+email+" does not exists"));

@@ -25,7 +25,7 @@ import java.util.Map;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 	@Value("${stomp.rabbitmq.host}")
-	private String rabbitqmHost;
+	private String rabbitmqHost;
 	@Value("${stomp.rabbitmq.port}")
 	private int rabbitmqPort;
 	@Value("${stomp.rabbitmq.username}")
@@ -63,11 +63,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		System.out.println("username="+rabbitmqUsername);
 		registry.setApplicationDestinationPrefixes("/api/socket");
 		registry.setUserDestinationPrefix("/user");
 		registry.enableStompBrokerRelay("/queue","/topic")
-				.setRelayHost(rabbitqmHost)
+				.setRelayHost(rabbitmqHost)
 				.setRelayPort(rabbitmqPort)
+				.setSystemLogin(rabbitmqUsername)
+				.setSystemPasscode(rabbitmqPassword)
 				.setClientLogin(rabbitmqUsername)
 				.setClientPasscode(rabbitmqPassword);
 	}

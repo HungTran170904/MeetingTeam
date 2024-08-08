@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,23 +22,21 @@ public class CloudinaryService {
 	Cloudinary cloudinary;
 	@Autowired
 	InfoChecking infoChecking;
+	private Random rand = new Random();
 	public String uploadFile(MultipartFile file,String folder,String url) {
 		try {
-			String format=file.getContentType().split("/")[1];
-			if(format.equals("vnd.openxmlformats-officedocument.wordprocessingml.document"))
-				format="docx"; //ms word
-			else if(format.equals("vnd.openxmlformats-officedocument.presentationml.presentation"))
-				format="pptx"; //powerpoint file
-			else if(format.equals("vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-					format="xlsx";
+			var filename=file.getOriginalFilename();
+			String format=filename.substring(filename.lastIndexOf(".")+1);
+
 			Map<String, Object> options=ObjectUtils.asMap(
-				    "unique_filename", "true",
 				    "resource_type","auto",
 				    "type","authenticated",
 				    "overwrite","true",
 				    "invalidate","true",
 				    "folder",folder,
-				    "format",format);
+				    "format",format,
+					"public_id", filename+"_"+rand.nextInt(10000)
+					);
 			if(url!=null) {
 				String[] strs=url.split("/");
 				System.out.println("Last string plit [.]: "+strs[strs.length-1].split("[.]"));

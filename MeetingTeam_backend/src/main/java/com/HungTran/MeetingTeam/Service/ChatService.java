@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -60,9 +61,9 @@ public class ChatService {
 		if(file!=null) {
 			chatMessage.setContent(cloudinaryService.uploadFile(file,infoChecking.getUserIdFromContext(),null));
 			String type=file.getContentType().split("/")[0];
-			if(type.equals("image")) chatMessage.setMessageType("IMAGE");
-			else if(type.equals("video")) chatMessage.setMessageType("VIDEO");
-			else if(type.equals("audio")) chatMessage.setMessageType("AUDIO");
+			if(type.equals("image")) chatMessage.setMessageType(Constraint.IMAGE);
+			else if(type.equals("video")) chatMessage.setMessageType(Constraint.VIDEO);
+			else if(type.equals("audio")) chatMessage.setMessageType(Constraint.AUDIO);
 			else chatMessage.setMessageType("FILE");
 			chatMessage.setFileName(file.getOriginalFilename());
 		}
@@ -77,10 +78,10 @@ public class ChatService {
 		if(file!=null) {
 			chatMessage.setContent(cloudinaryService.uploadFile(file,infoChecking.getUserIdFromContext(),null));
 			String type=file.getContentType().split("/")[0];
-			if(type.equals("image")) chatMessage.setMessageType("IMAGE");
-			else if(type.equals("video")) chatMessage.setMessageType("VIDEO");
-			else if(type.equals("audio")) chatMessage.setMessageType("AUDIO");
-			else chatMessage.setMessageType("FILE");
+			if(type.equals("image")) chatMessage.setMessageType(Constraint.IMAGE);
+			else if(type.equals("video")) chatMessage.setMessageType(Constraint.VIDEO);
+			else if(type.equals("audio")) chatMessage.setMessageType(Constraint.AUDIO);
+			else chatMessage.setMessageType(Constraint.FILE);
 			chatMessage.setFileName(file.getOriginalFilename());
 		}
 		var savedMess=messageRepo.save(chatMessage);
@@ -133,10 +134,10 @@ public class ChatService {
 		Message message=messageRepo.findById(messageId)
 				.orElseThrow(()->new RequestException("Message id "+messageId+" not found!"));
 		String type=message.getMessageType();
-		if(type=="IMAGE"||type=="AUDIO"||type=="IMAGE"||type=="FILE") {
+		if(type==Constraint.IMAGE||type==Constraint.AUDIO||type==Constraint.VIDEO||type==Constraint.FILE) {
 			cloudinaryService.deleteFile(message.getContent());
 		}
-		message.setMessageType("UNSEND");
+		message.setMessageType(Constraint.UNSEND);
 		message.setContent(null);
 		message.setReactions(null);
 		message.setVoting(null);

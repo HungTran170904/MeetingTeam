@@ -19,8 +19,8 @@
 .customImage{
     width:100% !important;
     height: 100% !important;
-    max-width: "400px" !important;
-    max-height: "400px" !important;
+    width: "400px" !important;
+    height: "400px" !important;
     object-fit: contain !important;
 }
       

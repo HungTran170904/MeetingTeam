@@ -1,0 +1,97 @@
+# Default values for common.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: hungtran679/mt-notification
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+rbac:
+  create: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+configmap:
+  enabled: false
+
+env:
+  - name: DB_HOST
+    value: mysql
+  - name: DB_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_PORT
+  - name: DB_USER
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_USER
+  - name: DB_PASS
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_PASS
+  - name: DB_DATABASE
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_DATABASE
+  - name: NOTIBROKER_HOST
+    value: noti-broker
+  - name: NOTIBROKER_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: noti-broker
+        key: NOTIBROKER_PORT
+  - name: NOTIBROKER_USER
+    valueFrom:
+      secretKeyRef:
+        name: noti-broker
+        key: NOTIBROKER_USER
+  - name: NOTIBROKER_PASS
+    valueFrom:
+      secretKeyRef:
+        name: noti-broker
+        key: NOTIBROKER_PASS
+
+pvc:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 8081
+
+resources: {}
+
+autoscaling:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -2,15 +2,13 @@ package com.HungTran.MeetingTeam.Security;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import com.HungTran.MeetingTeam.Converter.UserConverter;
 import com.HungTran.MeetingTeam.DTO.UserDTO;
 import com.HungTran.MeetingTeam.Exception.RequestException;
-import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -40,11 +38,17 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 	private UserConverter userConverter;
 	@Autowired
 	private JwtProvider jwtProvider;
+	@Autowired
+	private JwtConfig jwtConfig;
+	@Autowired
+	private CustomStatelessAuthorizationRequestRepository authRequestRepository;
 	@Value("${frontend.url}")
 	private String frontendUrl;
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws ServletException, IOException {
+		authRequestRepository.removeAuthorizationRequestCookies(request, response);
 		try{
 			var auth2Token = (OAuth2AuthenticationToken) authentication;
 			DefaultOAuth2User principal = (DefaultOAuth2User) auth2Token.getPrincipal();
@@ -60,7 +64,9 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 					auth2Token.getAuthorizedClientRegistrationId());
 			SecurityContextHolder.getContext().setAuthentication(securityAuth);
 			response.addCookie(jwtProvider.generateTokenCookie(securityAuth));
-			this.setDefaultTargetUrl(frontendUrl+"/friendChat");
+			var tokenExpiredDate=new Date((new Date()).getTime() + jwtConfig.expiration);
+			var isoString=tokenExpiredDate.toInstant().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+			this.setDefaultTargetUrl(frontendUrl+"/friendsPage?tokenExpiredDate="+isoString);
 		}
 		catch(Exception e){
 			e.printStackTrace();
