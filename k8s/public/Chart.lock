@@ -1,0 +1,21 @@
+dependencies:
+- name: mysql
+  repository: file://../mysql
+  version: 0.1.0
+- name: stomp-broker
+  repository: file://../stomp-broker
+  version: 0.1.0
+- name: noti-broker
+  repository: file://../noti-broker
+  version: 0.1.0
+- name: backend
+  repository: file://../backend
+  version: 0.1.0
+- name: notification-service
+  repository: file://../notification-service
+  version: 0.1.0
+- name: frontend
+  repository: file://../frontend
+  version: 0.1.0
+digest: sha256:70adf4b01616d0c4e6bfff89565e1c3157d84ad2d8334ffcd126ab4f37666299
+generated: "2024-08-09T16:39:52.9663502+07:00"
