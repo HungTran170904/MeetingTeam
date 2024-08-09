@@ -5,7 +5,9 @@ Building a chat website using ReactJS and Spring boot. This build covers basic f
 ## Architecture
 
 1. This is the architect of the MeetingTeam project:
-!Architect Image
+
+![Architect Image](images/architect.png)
 
 2. This is the database design of the MeetingTeam project:
-!Database Image
+
+![Database Image](images/database.png)
