@@ -62,6 +62,7 @@ const TextChannel=({team, channel, channelInfo})=>{
                     createdAt: new Date()
                 }
                 sendFileMessage(message, file);
+                e.target.value="";
           }
           function handleEmojiPicker(emojiData, e){
             setTextMessage(prev=>prev+emojiData.emoji);
