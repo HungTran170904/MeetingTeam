@@ -95,7 +95,7 @@ env:
         name: stomp-broker
         key: STOMPBROKER_PASS
   - name: FRONTEND_URL
-    value: http://localhost:3000
+    value: https://frontend.local
 
 pvc:
   enabled: false

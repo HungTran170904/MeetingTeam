@@ -6,6 +6,7 @@ import java.util.*;
 import com.HungTran.MeetingTeam.DTO.LoginDTO;
 import com.HungTran.MeetingTeam.Security.JwtConfig;
 import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,26 +29,18 @@ import com.HungTran.MeetingTeam.Util.InfoChecking;
 import jakarta.transaction.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-	@Autowired
-	UserRepo userRepo;
-	@Autowired
-	PasswordEncoder encoder;
-	@Autowired
-	JwtProvider jwtProvider;
-	@Autowired
-	RoleRepo roleRepo;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	UserConverter userConverter;
-	@Autowired
-	AuthenticationManager authManager;
-	@Autowired
-    MailService mailService;
-	@Autowired
-	JwtConfig jwtConfig;
-	private final Random random=new Random();
+	private final UserRepo userRepo;
+	private final PasswordEncoder encoder;
+	private final JwtProvider jwtProvider;
+	private final RoleRepo roleRepo;
+	private final InfoChecking infoChecking;
+	private final UserConverter userConverter;
+	private final AuthenticationManager authManager;
+	private final MailService mailService;
+	private final JwtConfig jwtConfig;
+	private Random random=new Random();
 
 	@Transactional
 	public void addUser(UserDTO dto) {

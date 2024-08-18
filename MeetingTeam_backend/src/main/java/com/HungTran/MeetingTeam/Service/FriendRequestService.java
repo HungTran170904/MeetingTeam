@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -23,21 +24,16 @@ import com.HungTran.MeetingTeam.Util.InfoChecking;
 import jakarta.transaction.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class FriendRequestService {
-	@Autowired
-	UserRepo userRepo;
-	@Autowired
-	FriendRelationRepo frRepo;
-	@Autowired
-	RequestMessageRepo requestMessRepo;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	RequestMessageConverter rmConverter;
-	@Autowired
-	UserConverter userConverter;
-	@Autowired
-	SocketTemplate socketTemplate;
+	private final UserRepo userRepo;
+	private final FriendRelationRepo frRepo;
+	private final RequestMessageRepo requestMessRepo;
+	private final InfoChecking infoChecking;
+	private final RequestMessageConverter rmConverter;
+	private final UserConverter userConverter;
+	private final SocketTemplate socketTemplate;
+
 	public void friendRequest(String email, String content) {
 		User recipient=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Sorry!!Double check that the email is correct"));
 		var userId=infoChecking.getUserIdFromContext();

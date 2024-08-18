@@ -3,6 +3,7 @@ package com.HungTran.MeetingTeam.Service;
 import com.HungTran.MeetingTeam.Converter.ReactionConverter;
 import com.HungTran.MeetingTeam.Model.Meeting;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -14,18 +15,18 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class RabbitMQService {
-	@Autowired
-	MailService mailService;
+	private final MailService mailService;
+	private final RabbitTemplate rabbitTemplate;
+
 	@Value("${rabbitmq.add-task-queue}")
 	private String addedTaskKey;
 	@Value("${rabbitmq.remove-task-queue}")
 	private String removedTaskKey;
 	@Value("${rabbitmq.exchange-name}")
 	private String exchange;
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	private final Logger LOGGER= LoggerFactory.getLogger(ReactionConverter.class);
+	private Logger LOGGER= LoggerFactory.getLogger(ReactionConverter.class);
 
 	@RabbitListener(queues="${rabbitmq.notification-queue}")
 	public void listenRabbitMQMessage(ObjectNode jsonObject) {

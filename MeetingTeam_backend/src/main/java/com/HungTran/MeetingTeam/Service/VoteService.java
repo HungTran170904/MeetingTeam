@@ -9,6 +9,7 @@ import com.HungTran.MeetingTeam.Repository.MessageRepo;
 import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.InfoChecking;
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class VoteService {
-    @Autowired
-    MessageRepo messageRepo;
-    @Autowired
-    ChannelRepo channelRepo;
-    @Autowired
-    ChatService chatService;
-    @Autowired
-    private InfoChecking infoChecking;
+    private final MessageRepo messageRepo;
+    private final ChatService chatService;
+    private final InfoChecking infoChecking;
 
 
     public void createVoting(Message message){

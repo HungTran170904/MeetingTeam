@@ -4,6 +4,7 @@ import com.HungTran.MeetingTeam.Exception.RequestException;
 import com.HungTran.MeetingTeam.Repository.ChannelRepo;
 import com.HungTran.MeetingTeam.Repository.MeetingRepo;
 import com.HungTran.MeetingTeam.Util.DateTimeUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -13,15 +14,13 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class MailService {
-    @Autowired
-    JavaMailSenderImpl mailSender;
-    @Autowired
-    MeetingRepo meetingRepo;
-    @Autowired
-    ChannelRepo channelRepo;
-    @Autowired
-    DateTimeUtil dateUtil;
+    private final JavaMailSenderImpl mailSender;
+    private final MeetingRepo meetingRepo;
+    private final ChannelRepo channelRepo;
+    private final DateTimeUtil dateUtil;
+
     @Value("${spring.mail.username}")
     String fromEmailAddress;
 

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,12 +18,12 @@ import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 
 @Service
+@RequiredArgsConstructor
 public class CloudinaryService {
-	@Autowired
-	Cloudinary cloudinary;
-	@Autowired
-	InfoChecking infoChecking;
+	private final Cloudinary cloudinary;
+	private final InfoChecking infoChecking;
 	private Random rand = new Random();
+
 	public String uploadFile(MultipartFile file,String folder,String url) {
 		try {
 			var filename=file.getOriginalFilename();

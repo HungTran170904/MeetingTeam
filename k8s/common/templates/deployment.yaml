@@ -29,6 +29,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "common.serviceAccountName" . }}
+      {{- with .Values.initContainers }}
+      initContainers: {{ toYaml . | nindent 8 }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -54,17 +57,23 @@ spec:
           {{- end}}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.pvc.enabled }}
           volumeMounts:
+            {{- if .Values.pvc.enabled }}
             - name: {{ .Values.pvc.pvName }}
               mountPath: {{ .Values.pvc.mountPath }}
-          {{- end }}
-      {{- if .Values.pvc.enabled }}
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
       volumes:
+        {{- if .Values.pvc.enabled }}
         - name: {{ .Values.pvc.pvName }}
           persistentVolumeClaim:
             claimName: {{ include "common.name" . }}
-      {{- end }}
+        {{- end }}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

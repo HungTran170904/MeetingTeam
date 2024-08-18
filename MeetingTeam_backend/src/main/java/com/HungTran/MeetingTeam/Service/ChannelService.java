@@ -6,6 +6,7 @@ import com.HungTran.MeetingTeam.Model.User;
 import com.HungTran.MeetingTeam.Repository.UserRepo;
 import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
@@ -25,23 +26,16 @@ import com.HungTran.MeetingTeam.Util.InfoChecking;
 import jakarta.transaction.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ChannelService {
-	@Autowired
-	ChannelRepo channelRepo;
-	@Autowired
-	TeamRepo teamRepo;
-	@Autowired
-	TeamMemberRepo teamMemberRepo;
-	@Autowired
-	ChannelConverter channelConverter;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	SocketTemplate socketTemplate;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private ChatService chatService;
+	private final ChannelRepo channelRepo;
+	private final TeamRepo teamRepo;
+	private final TeamMemberRepo teamMemberRepo;
+	private final ChannelConverter channelConverter;
+	private final InfoChecking infoChecking;
+	private final SocketTemplate socketTemplate;
+    private final UserRepo userRepo;
+    private final ChatService chatService;
 
 	public void updateChannel(ChannelDTO dto) {
 		if(dto.getTeamId()==null) throw new RequestException("TeamId is required!");

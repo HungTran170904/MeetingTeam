@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -26,23 +27,16 @@ import com.HungTran.MeetingTeam.Repository.UserRepo;
 import com.HungTran.MeetingTeam.Util.InfoChecking;
 
 @Service
+@RequiredArgsConstructor
 public class ChatService {
-	@Autowired
-	MessageRepo messageRepo;
-	@Autowired
-	TeamRepo teamRepo;
-	@Autowired
-	UserRepo userRepo;
-	@Autowired
-	ChannelRepo channelRepo;
-	@Autowired
-	TeamMemberRepo teamMemberRepo;
-	@Autowired
-	SocketTemplate socketTemplate;
-	@Autowired
-	CloudinaryService cloudinaryService;
-	@Autowired
-	InfoChecking infoChecking;
+	private final MessageRepo messageRepo;
+	private final TeamRepo teamRepo;
+	private final UserRepo userRepo;
+	private final ChannelRepo channelRepo;
+	private final TeamMemberRepo teamMemberRepo;
+	private final SocketTemplate socketTemplate;
+	private final CloudinaryService cloudinaryService;
+	private final InfoChecking infoChecking;
 
 	public void broadcastMessage(Message message) {
 		if(message.getRecipientId()!=null) {

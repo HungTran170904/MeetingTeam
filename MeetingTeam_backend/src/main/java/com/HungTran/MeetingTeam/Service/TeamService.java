@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -40,27 +41,18 @@ import com.HungTran.MeetingTeam.Util.InfoChecking;
 import jakarta.transaction.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class TeamService {
-	@Autowired
-	TeamRepo teamRepo;
-	@Autowired
-	UserRepo userRepo;
-	@Autowired
-	ChannelRepo channelRepo;
-	@Autowired
-	TeamMemberRepo teamMemberRepo;
-	@Autowired
-	TeamConverter teamConverter;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	CloudinaryService cloudinaryService;
-	@Autowired
-	SocketTemplate socketTemplate;
-	@Autowired
-	UserConverter userConverter;
-	@Autowired
-	TeamMemberConverter tmConverter;
+	private final TeamRepo teamRepo;
+	private final UserRepo userRepo;
+	private final ChannelRepo channelRepo;
+	private final TeamMemberRepo teamMemberRepo;
+	private final TeamConverter teamConverter;
+	private final InfoChecking infoChecking;
+	private final CloudinaryService cloudinaryService;
+	private final SocketTemplate socketTemplate;
+	private final TeamMemberConverter tmConverter;
+
 	@Transactional
 	public TeamDTO createTeam(TeamDTO dto) {
 		User leader=infoChecking.getUserFromContext();
