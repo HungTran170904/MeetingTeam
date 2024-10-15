@@ -1,0 +1,45 @@
+replicaCount: 2
+
+resources: 
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+secret:
+  enabled: true
+  data:
+    RABBITMQ_DEFAULT_USER:  YWRtaW4=
+    RABBITMQ_DEFAULT_PASS:  dHJhbnRpZW5odW5nLjEy
+    RABBITMQ_ERLANG_COOKIE: aGVsbG8td29ybGQ=
+
+env:
+  - name: RABBITMQ_DEFAULT_USER
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_DEFAULT_USER
+  - name: RABBITMQ_DEFAULT_PASS
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_DEFAULT_PASS
+  - name: RABBITMQ_ERLANG_COOKIE
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_ERLANG_COOKIE
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: rabbitmq.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+          port: 15672
+  tls: []

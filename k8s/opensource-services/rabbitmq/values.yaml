@@ -1,0 +1,107 @@
+# Default values for common.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: rabbitmq:latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext:
+  fsGroup: 999
+  runAsUser: 999
+  runAsGroup: 999
+
+initContainers:
+  rabbitmqConfig:
+    image: busybox:1.32.0
+
+secret:
+  enabled: false
+  # parse secret in base64 format
+  # data:
+  #   RABBITMQ_DEFAULT_USER:  YWRtaW4=
+  #   RABBITMQ_DEFAULT_PASS:  YWRtaW4=
+  #   RABBITMQ_ERLANG_COOKIE: aGVsbG8td29ybGQ=
+    
+configmap:
+  enabled: true
+  additionalData:
+    RABBITMQ_PORT: "61613"
+
+env:
+  # - name: RABBITMQ_DEFAULT_USER
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: rabbitmq
+  #       key: RABBITMQ_DEFAULT_USER
+  # - name: RABBITMQ_DEFAULT_PASS
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: rabbitmq
+  #       key: RABBITMQ_DEFAULT_PASS
+  # - name: RABBITMQ_ERLANG_COOKIE
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: rabbitmq
+  #       key: RABBITMQ_ERLANG_COOKIE
+
+pvcData:
+  accessMode: ReadWriteOnce
+  storage: 500Mi
+  pvName: mysql-pv
+  mountPath: /var/lib/mysql
+
+service:
+  type: ClusterIP
+  ports:
+    amqp: 5672
+    manager: 15672
+    stomp: 61613
+
+ingress:
+  enabled: false
+  # className: "nginx"
+  # annotations: {}
+  # hosts:
+  #   - host: rabbitmq.local
+  #     paths:
+  #       - path: /
+  #         pathType: ImplementationSpecific
+  #         port: 15672
+  # tls: []
+
+resources: {}
+
+readinessProbe:
+  exec:
+    command: ["rabbitmq-diagnostics", "ping"]
+    initialDelaySeconds: 20
+    periodSeconds: 60
+    timeoutSeconds: 10
+
+livenessProbe:
+  exec:
+    command: ["rabbitmq-diagnostics", "status"]
+  initialDelaySeconds: 60
+  periodSeconds: 60
+  timeoutSeconds: 15
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
