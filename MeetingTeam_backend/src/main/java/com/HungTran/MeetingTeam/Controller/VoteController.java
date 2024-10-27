@@ -4,6 +4,7 @@ import com.HungTran.MeetingTeam.Model.Message;
 import com.HungTran.MeetingTeam.Service.VoteService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +15,17 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/api/voting")
+@RequiredArgsConstructor
 public class VoteController {
-    @Autowired
-    VoteService voteService;
+    private final VoteService voteService;
     private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
+
     @PostMapping("/createVoting")
     public ResponseEntity<HttpStatus> createVoting(@RequestBody Message message){
         voteService.createVoting(message);
         return new ResponseEntity(HttpStatus.OK);
     }
+
     @PostMapping("/chooseOption")
     public ResponseEntity<HttpStatus> chooseOption(
             @RequestParam("messId") Integer messId,
@@ -31,6 +34,7 @@ public class VoteController {
         voteService.chooseOption(messId,optionNames);
         return new ResponseEntity(HttpStatus.OK);
     }
+
     @GetMapping("/blockVoting/{id}")
     public ResponseEntity<HttpStatus> cancelVoting(
             @PathVariable("id") Integer id){

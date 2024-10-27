@@ -38,8 +38,7 @@ public class JwtProvider {
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		cookie.setMaxAge(jwtConfig.expiration);
-		cookie.setSecure(true);
-		cookie.setAttribute("sameSite","None");
+		cookie.setAttribute("sameSite","Strict");
 		return cookie;
 	}
 	public String getIdFromToken(String token) {

@@ -1,0 +1,90 @@
+# Default values for common.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# ReplicaCount is no more than 1 as this service cann't be scaled at the moment design
+replicaCount: 1
+
+image:
+  repository: hungtran679/mt-notification
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+rbac:
+  create: false
+
+serviceAccount:
+  create: false
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+configmap:
+  enabled: false
+
+env:
+  - name: DB_HOST
+    value: mysql
+  - name: DB_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_PORT
+  - name: DB_USER
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_USER
+  - name: DB_PASS
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_PASS
+  - name: DB_DATABASE
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_DATABASE
+  - name: NOTIBROKER_HOST
+    value: rabbitmq
+  - name: NOTIBROKER_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_AMQP_PORT
+  - name: NOTIBROKER_USER
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_DEFAULT_USER
+  - name: NOTIBROKER_PASS
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_DEFAULT_PASS
+
+pvc:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 8081
+
+resources: {}
+
+autoscaling:
+  enabled: false
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

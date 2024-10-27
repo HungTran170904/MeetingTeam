@@ -1,0 +1,21 @@
+elasticsearchHosts: "http://elasticsearch-master:9200"
+replicas: 1
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  pathtype: ImplementationSpecific
+  hosts:
+    - host: kibana.local
+      paths:
+        - path: /
+  tls: []
+

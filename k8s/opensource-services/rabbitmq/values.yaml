@@ -5,7 +5,7 @@
 replicaCount: 2
 
 image:
-  repository: rabbitmq:latest
+  repository: "rabbitmq:latest"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -40,7 +40,8 @@ secret:
 configmap:
   enabled: true
   additionalData:
-    RABBITMQ_PORT: "61613"
+    RABBITMQ_AMQP_PORT: "5672"
+    RABBITMQ_STOMP_PORT: "61613"
 
 env:
   # - name: RABBITMQ_DEFAULT_USER
@@ -62,8 +63,7 @@ env:
 pvcData:
   accessMode: ReadWriteOnce
   storage: 500Mi
-  pvName: mysql-pv
-  mountPath: /var/lib/mysql
+  storageClassName: standard
 
 service:
   type: ClusterIP

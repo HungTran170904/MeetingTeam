@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Controller;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +21,17 @@ import com.HungTran.MeetingTeam.Service.FriendRequestService;
 
 @RestController
 @RequestMapping("/api/friendRequest")
+@RequiredArgsConstructor
 public class FriendRequestController {
-	@Autowired
-	FriendRequestService frService;
+	private final FriendRequestService frService;
+
 	@GetMapping("/acceptFriend")
 	public ResponseEntity<HttpStatus> acceptFriend(
 			@RequestParam("messageId") Integer messageId){
 		frService.acceptFriend(messageId);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+
 	@PostMapping("/sendFriendRequest")
 	public ResponseEntity<HttpStatus> sendFriendRequest(
 			@RequestParam("email") String email,
@@ -36,10 +39,12 @@ public class FriendRequestController {
 		frService.friendRequest(email, content);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+
 	@GetMapping("/getFriendRequests")
 	public ResponseEntity<List<RequestMessageDTO>> getFriendRequests(){
 		return ResponseEntity.ok(frService.getFriendRequests());
 	}
+
 	@DeleteMapping("/deleteFriendRequest/{id}")
 	public ResponseEntity<HttpStatus> deleteFriendRequest(
 			@PathVariable("id") Integer id){

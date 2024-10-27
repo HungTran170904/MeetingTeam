@@ -3,6 +3,7 @@ package com.HungTran.MeetingTeam.WebSocket;
 import com.HungTran.MeetingTeam.Security.JwtConfig;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,17 +24,17 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
-	@Value("${stomp.rabbitmq.host}")
+	@Value("${spring.rabbitmq.host}")
 	private String rabbitmqHost;
 	@Value("${stomp.rabbitmq.port}")
 	private int rabbitmqPort;
-	@Value("${stomp.rabbitmq.username}")
+	@Value("${spring.rabbitmq.username}")
 	private String rabbitmqUsername;
-	@Value("${stomp.rabbitmq.password}")
+	@Value("${spring.rabbitmq.password}")
 	private String rabbitmqPassword;
-	@Autowired
-	JwtConfig jwtConfig;
+	private final JwtConfig jwtConfig;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -63,7 +64,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
-		System.out.println("username="+rabbitmqUsername);
 		registry.setApplicationDestinationPrefixes("/api/socket");
 		registry.setUserDestinationPrefix("/user");
 		registry.enableStompBrokerRelay("/queue","/topic")

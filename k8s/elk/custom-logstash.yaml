@@ -1,0 +1,66 @@
+logstashJavaOpts: "-Xmx256m -Xms256m"
+
+resources: {}
+
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 512Mi
+
+antiAffinity: "soft"
+
+extraEnvs: 
+  - name: xpack.monitoring.enabled
+    value: "false"
+
+service:
+  type: ClusterIP
+  ports:
+    - name: beats
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+    - name: http
+      port: 9600
+      protocol: TCP
+      targetPort: 9600
+
+logstashPipeline:
+  logstash.conf: |
+    input {
+        beats {
+            port => "5044"
+        }
+    }
+    filter {
+        grok {
+            add_field => [ "received_at", "%{@timestamp}" ]
+        }
+    }
+    output {
+      if "myopensource" in [tags] {
+        elasticsearch {
+          hosts => [ "elasticsearch-master:9200" ]
+          index => "logstash_myopensource_%{+YYYY.MM.dd}"
+          }
+      }
+      else if "myservice" in [tags] {
+        elasticsearch {
+          hosts => [ "elasticsearch-master:9200" ]
+          index => "logstash_myservice_%{+YYYY.MM.dd}"
+         }
+      }
+      else if "kubeservice" in [tags] {
+        elasticsearch {
+          hosts => [ "elasticsearch-master:9200" ]
+          index => "logstash_kubeservice_%{+YYYY.MM.dd}"
+         }
+      }
+      else {
+        elasticsearch {
+          hosts => [ "elasticsearch-master:9200" ]
+          index => "logstash_default_%{+YYYY.MM.dd}"
+         }
+      }
+    }

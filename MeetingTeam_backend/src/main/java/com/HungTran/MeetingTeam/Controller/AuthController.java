@@ -4,10 +4,9 @@ import com.HungTran.MeetingTeam.DTO.LoginDTO;
 import com.HungTran.MeetingTeam.Security.JwtConfig;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.web.bind.annotation.*;
 
 import com.HungTran.MeetingTeam.DTO.UserDTO;
@@ -15,13 +14,11 @@ import com.HungTran.MeetingTeam.Service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
-	@Autowired
-	AuthService authService;
-	@Autowired
-	OAuth2AuthorizedClientService clientService;
-	@Autowired
-	JwtConfig jwtConfig;
+	private final AuthService authService;
+	private final JwtConfig jwtConfig;
+
 	@PostMapping("/registerUser")
 	public ResponseEntity<HttpStatus> registerUser(
 			@RequestBody UserDTO dto) throws Exception{

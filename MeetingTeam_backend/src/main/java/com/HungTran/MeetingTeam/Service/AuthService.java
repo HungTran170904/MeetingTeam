@@ -56,6 +56,7 @@ public class AuthService {
 		u.setIsActivated(false);
 		sendOTPcode(u);
 	}
+
 	public void activateUser(String email, String OTPcode) {
 		User u=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Email "+email+" does not exists"));
 		if(u.getOTPtime()==null||u.getOTPtime().isBefore(LocalDateTime.now()))
@@ -67,6 +68,7 @@ public class AuthService {
 		u.setIsActivated(true);
 		userRepo.save(u);
 	}
+
 	public Map.Entry<Cookie,LoginDTO> login(String email, String password) {
 		Authentication authentication = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email,password));
@@ -78,10 +80,12 @@ public class AuthService {
 		var loginDTO=new LoginDTO(userDTO, expiredDate);
 		return new AbstractMap.SimpleImmutableEntry<>(cookie,loginDTO);
 	}
+
 	public void sendOTPcode(String email) {
 		User u=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Email "+email+" does not exists"));
 		sendOTPcode(u);
 	}
+
 	public void sendOTPcode(User u) {
 		String otp="";
 		for(int i=0;i<6;i++) otp+=random.nextInt(9);
@@ -90,6 +94,7 @@ public class AuthService {
 		mailService.sendOTPMail(u.getEmail(),otp);
 		userRepo.save(u);
 	}
+
 	public void changePassword(String email, String newPassword, String OTPcode) {
 		User u=userRepo.findByEmail(email).orElseThrow(()->new RequestException("Email "+email+" does not exists"));
 		if(u.getOTPtime()==null||u.getOTPtime().isBefore(LocalDateTime.now()))
@@ -101,6 +106,7 @@ public class AuthService {
 		u.setOTPtime(null);
 		userRepo.save(u);
 	}
+
 	public void checkAndUpdatePassword(String currentPassword,String newPassword, User u) {
 		try {
 			Authentication authentication = authManager.authenticate(

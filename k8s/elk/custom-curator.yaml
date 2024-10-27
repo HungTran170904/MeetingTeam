@@ -1,0 +1,79 @@
+image:
+  repository: bitnami/elasticsearch-curator-archived
+  tag: 5.8.4
+  pullPolicy: IfNotPresent
+
+cronjob:
+  # At 01:00 every day
+  schedule: "* * * * *"
+
+configMaps:
+  # Delete indices older than specified days
+  action_file_yml: |-
+    ---
+    actions:
+      1:
+        action: delete_indices
+        description: >-
+          Delete indices older than 30 days for myservice
+        options:
+          ignore_empty_list: True
+          disable_action: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: logstash-myservice-
+        - filtertype: age
+          source: creation_date
+          direction: older
+          unit: days
+          unit_count: 30
+
+      2:
+        action: delete_indices
+        description: >-
+          Delete indices older than 7 days for myopensource
+        options:
+          ignore_empty_list: True
+          disable_action: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: logstash-myopensource-
+        - filtertype: age
+          source: creation_date
+          direction: older
+          unit: days
+          unit_count: 7
+
+      3:
+        action: delete_indices
+        description: >-
+          Delete indices older than 1 day for kubeservice
+        options:
+          ignore_empty_list: True
+          disable_action: False
+        filters:
+        - filtertype: pattern
+          kind: prefix
+          value: logstash-kubeservice-
+        - filtertype: age
+          source: creation_date
+          direction: older
+          unit: days
+          unit_count: 1
+
+  config_yml: |-
+    ---
+    client:
+      hosts:
+        - elasticsearch-master
+      port: 9200
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

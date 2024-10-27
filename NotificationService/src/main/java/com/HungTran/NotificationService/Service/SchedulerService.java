@@ -5,6 +5,7 @@ import com.HungTran.NotificationService.Models.Meeting;
 import com.HungTran.NotificationService.Repository.MeetingRepo;
 import com.HungTran.NotificationService.Util.DateTimeUtil;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -21,19 +22,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
+@RequiredArgsConstructor
 public class SchedulerService {
-    @Autowired
-    ThreadPoolTaskScheduler taskScheduler;
-    @Autowired
-    Map<String, ScheduledFuture<?>> scheduledTasks;
-    @Autowired
-    RabbitMQService rabbitMQService;
-    @Autowired
-    MeetingRepo meetingRepo;
-    @Autowired
-    DateTimeUtil dateUtil;
-    private final SimpleTriggerContext triggerContext = new SimpleTriggerContext();
-    private final long distance=24*60*60;
+    private final ThreadPoolTaskScheduler taskScheduler;
+    private final Map<String, ScheduledFuture<?>> scheduledTasks;
+    private final RabbitMQService rabbitMQService;
+    private final MeetingRepo meetingRepo;
+    private final DateTimeUtil dateUtil;
+    private SimpleTriggerContext triggerContext = new SimpleTriggerContext();
+    private long distance=24*60*60;
 
     @PostConstruct
     public void loadScheduledTasks() {
