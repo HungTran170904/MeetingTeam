@@ -69,11 +69,3 @@ configMaps:
       hosts:
         - elasticsearch-master
       port: 9200
-
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi

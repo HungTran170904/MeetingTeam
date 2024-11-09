@@ -6,9 +6,13 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import com.HungTran.MeetingTeam.Config.JwtConfig;
 import com.HungTran.MeetingTeam.Converter.UserConverter;
 import com.HungTran.MeetingTeam.DTO.UserDTO;
 import com.HungTran.MeetingTeam.Exception.RequestException;
+import com.HungTran.MeetingTeam.Util.CookieUtils;
+import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -29,19 +33,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler{
-	@Autowired
-	private UserRepo userRepo;
-	@Autowired
-	private RoleRepo roleRepo;
-	@Autowired
-	private UserConverter userConverter;
-	@Autowired
-	private JwtProvider jwtProvider;
-	@Autowired
-	private JwtConfig jwtConfig;
-	@Autowired
-	private CustomStatelessAuthorizationRequestRepository authRequestRepository;
+	private final UserRepo userRepo;
+	private final RoleRepo roleRepo;
+	private final UserConverter userConverter;
+	private final JwtProvider jwtProvider;
+	private final JwtConfig jwtConfig;
+	private final CookieUtils cookieUtils;
+	private final CustomStatelessAuthorizationRequestRepository authRequestRepository;
+
 	@Value("${frontend.url}")
 	private String frontendUrl;
 
@@ -63,7 +64,10 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 			Authentication securityAuth = new OAuth2AuthenticationToken(newUser,grantedAuthorities,
 					auth2Token.getAuthorizedClientRegistrationId());
 			SecurityContextHolder.getContext().setAuthentication(securityAuth);
-			response.addCookie(jwtProvider.generateTokenCookie(securityAuth));
+
+			Cookie authCookie= cookieUtils.generateTokenCookie(jwtProvider.generateToken(securityAuth));
+			response.addCookie(authCookie);
+
 			var tokenExpiredDate=new Date((new Date()).getTime() + jwtConfig.expiration);
 			var isoString=tokenExpiredDate.toInstant().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
 			this.setDefaultTargetUrl(frontendUrl+"/friendsPage?tokenExpiredDate="+isoString);

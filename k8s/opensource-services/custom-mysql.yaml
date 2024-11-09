@@ -23,3 +23,7 @@ resources:
   limits:
     cpu: "1000m"
     memory: "512Mi"
+
+pvc:
+  enabled: true
+  storageClassName: longhorn-storage-delete

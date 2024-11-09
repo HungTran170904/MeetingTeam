@@ -10,6 +10,18 @@ spec:
     matchLabels:
       {{- include "rabbitmq.selectorLabels" . | nindent 6 }}
   serviceName: {{ include "rabbitmq.name" . }}-headless
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "rabbitmq.name" . }}-data
+      labels:
+        {{- include "rabbitmq.labels" . | nindent 8 }}
+    spec:
+      storageClassName: {{ .Values.pvcData.storageClassName }}
+      accessModes:
+        {{- toYaml .Values.pvcData.accessModes | nindent 8 }}
+      resources:
+        requests:
+          storage: {{ .Values.pvcData.storage }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -84,16 +96,15 @@ spec:
               containerPort: {{ $svcPort }}
               protocol: TCP
           {{- end }}
-
-      {{- with .Values.livenessProbe}}
-      livenessProbe:
-        {{- toYaml . | nindent 8 }}
-      {{- end}}
-      {{- with .Values.readinessProbe}}
-      readinessProbe:
-        {{- toYaml . | nindent 8 }}
-      {{- end}}
-      {{- with .Values.nodeSelector }}
+          {{- with .Values.livenessProbe}}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end}}
+          {{- with .Values.readinessProbe}}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end}}
+          {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}

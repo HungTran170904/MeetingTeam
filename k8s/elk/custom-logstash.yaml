@@ -1,9 +1,16 @@
 logstashJavaOpts: "-Xmx256m -Xms256m"
 
-resources: {}
+resources:
+  requests:
+    cpu: "100m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
 
 volumeClaimTemplate:
   accessModes: ["ReadWriteOnce"]
+  storageClassName: longhorn-storage-delete
   resources:
     requests:
       storage: 512Mi

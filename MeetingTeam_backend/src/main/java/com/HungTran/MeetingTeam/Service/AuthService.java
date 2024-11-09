@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import com.HungTran.MeetingTeam.DTO.LoginDTO;
-import com.HungTran.MeetingTeam.Security.JwtConfig;
+import com.HungTran.MeetingTeam.Config.JwtConfig;
+import com.HungTran.MeetingTeam.Util.CookieUtils;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,6 +40,7 @@ public class AuthService {
 	private final AuthenticationManager authManager;
 	private final MailService mailService;
 	private final JwtConfig jwtConfig;
+	private final CookieUtils cookieUtils;
 	private Random random=new Random();
 
 	@Transactional
@@ -73,12 +74,16 @@ public class AuthService {
 		Authentication authentication = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email,password));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		var cookie=jwtProvider.generateTokenCookie(authentication);
+
+		String token= jwtProvider.generateToken(authentication);
+		var authCookie=cookieUtils.generateTokenCookie(token);
+
 		CustomUserDetails userDetails=(CustomUserDetails) authentication.getPrincipal();
 		var userDTO= userConverter.convertUserToDTO(userDetails.getU());
 		var expiredDate=new Date((new Date()).getTime() + jwtConfig.expiration);
 		var loginDTO=new LoginDTO(userDTO, expiredDate);
-		return new AbstractMap.SimpleImmutableEntry<>(cookie,loginDTO);
+
+		return new AbstractMap.SimpleImmutableEntry<>(authCookie,loginDTO);
 	}
 
 	public void sendOTPcode(String email) {

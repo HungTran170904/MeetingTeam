@@ -1,6 +1,6 @@
-replicas: 1
+replicas: 2
 
-antiAffinity: "soft"
+antiAffinity: "hard"
 
 # Shrink default JVM heap.
 esJavaOpts: "-Xmx128m -Xms128m"
@@ -17,18 +17,17 @@ resources:
 # Request smaller persistent volumes.
 volumeClaimTemplate:
   accessModes: [ "ReadWriteOnce" ]
-  storageClassName: "standard"
+  storageClassName: longhorn-storage-delete
   resources:
     requests:
       storage: 500Mi
-
 
 ingress:
   enabled: true
   className: "nginx"
   pathtype: ImplementationSpecific
   hosts:
-    - host: elasticsearch.local
+    - host: k8s.elasticsearch.local
       paths:
         - path: /
   tls: []

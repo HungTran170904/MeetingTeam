@@ -14,8 +14,7 @@ ingress:
   className: "nginx"
   pathtype: ImplementationSpecific
   hosts:
-    - host: kibana.local
+    - host: k8s.kibana.local
       paths:
         - path: /
   tls: []
-

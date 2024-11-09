@@ -1,10 +1,8 @@
 package com.HungTran.MeetingTeam.Security;
 
-import java.util.List;
 import java.util.Map;
 
-import com.HungTran.MeetingTeam.Util.InfoChecking;
-import org.aopalliance.intercept.Interceptor;
+import com.HungTran.MeetingTeam.Config.JwtConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +17,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
@@ -33,7 +28,7 @@ public class WebsocketAuthenticationConfig implements WebSocketMessageBrokerConf
 	@Autowired
 	JwtProvider jwtProvider;
 	@Autowired
-	JwtConfig jwtConfig;
+    JwtConfig jwtConfig;
 	@Autowired
 	CustomUserDetailsService customUserDetailsService;
 	@Override

@@ -24,7 +24,7 @@ securityContext: {}
 
 env:
   - name: API_ENDPOINT
-    value: /backend
+    value: "http://k8s.backend.chatapp.local"
 
 pvc:
   enabled: false
@@ -38,7 +38,7 @@ ingress:
   className: "nginx"
   annotations: {}
   hosts:
-  - host: chatapp.local
+  - host: k8s.frontend.chatapp.local
     paths:
       - path: /
         pathType: ImplementationSpecific

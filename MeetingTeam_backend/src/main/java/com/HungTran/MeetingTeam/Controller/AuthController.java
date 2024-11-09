@@ -1,7 +1,7 @@
 package com.HungTran.MeetingTeam.Controller;
 
 import com.HungTran.MeetingTeam.DTO.LoginDTO;
-import com.HungTran.MeetingTeam.Security.JwtConfig;
+import com.HungTran.MeetingTeam.Util.CookieUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import com.HungTran.MeetingTeam.Service.AuthService;
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
-	private final JwtConfig jwtConfig;
+	private final CookieUtils cookieUtils;
 
 	@PostMapping("/registerUser")
 	public ResponseEntity<HttpStatus> registerUser(
@@ -59,10 +59,8 @@ public class AuthController {
 	@GetMapping("/logout")
 	public ResponseEntity<HttpStatus> logout(
 			HttpServletResponse response){
-		Cookie authCookie = new Cookie(jwtConfig.header, null);
-		authCookie.setMaxAge(0);
-		authCookie.setPath("/");
-		response.addCookie(authCookie);
+		Cookie expiredCookie = cookieUtils.generateExpiredCookie();
+		response.addCookie(expiredCookie);
 		return new ResponseEntity(HttpStatus.OK);
 	}
 }

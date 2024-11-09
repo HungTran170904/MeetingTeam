@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Security;
 
 import java.util.Date;
 
+import com.HungTran.MeetingTeam.Config.JwtConfig;
 import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -17,6 +18,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JwtProvider {
 	@Autowired
 	JwtConfig jwtConfig;
+
 	public String generateToken(Authentication auth) {
 		String id=auth.getName();
 		Date currentDate = new Date();
@@ -33,14 +35,7 @@ public class JwtProvider {
 				.compact();
 		return jwtConfig.prefix+token;
 	}
-	public Cookie generateTokenCookie(Authentication auth){
-		Cookie cookie=new Cookie(jwtConfig.header,generateToken(auth));
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-		cookie.setMaxAge(jwtConfig.expiration);
-		cookie.setAttribute("sameSite","Strict");
-		return cookie;
-	}
+
 	public String getIdFromToken(String token) {
 		try {
 			String content=token.substring(jwtConfig.prefix.length(), token.length());

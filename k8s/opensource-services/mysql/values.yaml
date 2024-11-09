@@ -54,6 +54,7 @@ env:
 pvc:
   enabled: true
   accessMode: ReadWriteOnce
+  storageClassName: standard
   storage: 500Mi
   pvName: mysql-pv
   mountPath: /var/lib/mysql
