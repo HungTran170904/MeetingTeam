@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "rabbitmq.name" . }}
+  labels:
+    {{- include "rabbitmq.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "rabbitmq.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "rabbitmq.name" . }}-headless
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "rabbitmq.name" . }}-data
+      labels:
+        {{- include "rabbitmq.labels" . | nindent 8 }}
+    spec:
+      storageClassName: {{ .Values.pvcData.storageClassName }}
+      accessModes:
+        {{- toYaml .Values.pvcData.accessModes | nindent 8 }}
+      resources:
+        requests:
+          storage: {{ .Values.pvcData.storage }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rabbitmq.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: rabbitmq-config
+          configMap:
+            name: {{ include "rabbitmq.name" . }}
+            optional: false
+            items:
+              - key: enabled_plugins
+                path: "enabled_plugins"
+              - key: rabbitmq.conf
+                path: "rabbitmq.conf"
+        - name: rabbitmq-config-rw
+          emptyDir: {}
+        - name: rabbitmq-data
+          persistentVolumeClaim:
+            claimName: {{ include "rabbitmq.name" . }}-data
+      initContainers: 
+        - name: {{ include "rabbitmq.name" . }}-config
+          image: "{{ .Values.initContainers.rabbitmqConfig.image }}"
+          volumeMounts:
+            - name: rabbitmq-config
+              mountPath: /tmp/rabbitmq
+            - name: rabbitmq-config-rw
+              mountPath: /etc/rabbitmq
+          command:
+            - sh
+            - -c
+            - cp /tmp/rabbitmq/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf && echo '' >> /etc/rabbitmq/rabbitmq.conf;
+              cp /tmp/rabbitmq/enabled_plugins /etc/rabbitmq/enabled_plugins
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "rabbitmq.serviceAccountName" . }}
+      {{- end }}
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.env }}
+          env:
+            {{- toYaml . | nindent 12}}
+          {{- end}}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: rabbitmq-config-rw
+              mountPath: "/etc/rabbitmq"
+            - name: rabbitmq-data
+              mountPath: "/var/lib/rabbitmq/mnesia"            
+          ports:
+          {{- range $name, $svcPort := .Values.service.ports}}
+            - name: {{ $name }}
+              containerPort: {{ $svcPort }}
+              protocol: TCP
+          {{- end }}
+          {{- with .Values.livenessProbe}}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end}}
+          {{- with .Values.readinessProbe}}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end}}
+          {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

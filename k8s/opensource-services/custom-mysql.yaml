@@ -1,0 +1,29 @@
+secret:
+  enabled: true
+  data:
+    DB_USER:  cm9vdA==
+    DB_PASS:  dHJhbnRpZW5odW5nLjEy
+
+env:
+  - name: MYSQL_DATABASE
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_DATABASE
+  - name: MYSQL_ROOT_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_PASS
+
+resources: 
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+pvc:
+  enabled: true
+  storageClassName: longhorn-storage-delete

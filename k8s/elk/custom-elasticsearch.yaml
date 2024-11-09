@@ -1,0 +1,33 @@
+replicas: 2
+
+antiAffinity: "hard"
+
+# Shrink default JVM heap.
+esJavaOpts: "-Xmx128m -Xms128m"
+
+# Allocate smaller chunks of memory per pod.
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+# Request smaller persistent volumes.
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: longhorn-storage-delete
+  resources:
+    requests:
+      storage: 500Mi
+
+ingress:
+  enabled: true
+  className: "nginx"
+  pathtype: ImplementationSpecific
+  hosts:
+    - host: k8s.elasticsearch.local
+      paths:
+        - path: /
+  tls: []

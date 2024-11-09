@@ -1,16 +1,15 @@
 package com.HungTran.MeetingTeam.WebSocket;
 
-import com.HungTran.MeetingTeam.Security.JwtConfig;
+import com.HungTran.MeetingTeam.Config.JwtConfig;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
@@ -23,17 +22,17 @@ import java.util.Map;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
-	@Value("${stomp.rabbitmq.host}")
-	private String rabbitqmHost;
+	@Value("${spring.rabbitmq.host}")
+	private String rabbitmqHost;
 	@Value("${stomp.rabbitmq.port}")
 	private int rabbitmqPort;
-	@Value("${stomp.rabbitmq.username}")
+	@Value("${spring.rabbitmq.username}")
 	private String rabbitmqUsername;
-	@Value("${stomp.rabbitmq.password}")
+	@Value("${spring.rabbitmq.password}")
 	private String rabbitmqPassword;
-	@Autowired
-	JwtConfig jwtConfig;
+	private final JwtConfig jwtConfig;
 
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -66,8 +65,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 		registry.setApplicationDestinationPrefixes("/api/socket");
 		registry.setUserDestinationPrefix("/user");
 		registry.enableStompBrokerRelay("/queue","/topic")
-				.setRelayHost(rabbitqmHost)
+				.setRelayHost(rabbitmqHost)
 				.setRelayPort(rabbitmqPort)
+				.setSystemLogin(rabbitmqUsername)
+				.setSystemPasscode(rabbitmqPassword)
 				.setClientLogin(rabbitmqUsername)
 				.setClientPasscode(rabbitmqPassword);
 	}

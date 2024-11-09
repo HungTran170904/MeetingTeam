@@ -1,35 +1,24 @@
 package com.HungTran.MeetingTeam.Controller;
 
-import com.HungTran.MeetingTeam.Security.JwtConfig;
+import com.HungTran.MeetingTeam.DTO.LoginDTO;
+import com.HungTran.MeetingTeam.Util.CookieUtils;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.websocket.server.PathParam;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import com.HungTran.MeetingTeam.DTO.UserDTO;
 import com.HungTran.MeetingTeam.Service.AuthService;
-import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.Arrays;
-import java.util.Map;
-// https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo/blob/master/react-social/src/user/oauth2/OAuth2RedirectHandler.js
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
-	@Autowired
-	AuthService authService;
-	@Autowired
-	OAuth2AuthorizedClientService clientService;
-	@Autowired
-	JwtConfig jwtConfig;
+	private final AuthService authService;
+	private final CookieUtils cookieUtils;
+
 	@PostMapping("/registerUser")
 	public ResponseEntity<HttpStatus> registerUser(
 			@RequestBody UserDTO dto) throws Exception{
@@ -37,7 +26,7 @@ public class AuthController {
 		return new ResponseEntity(HttpStatus.OK);
 	}
 	@PostMapping("/login")
-	public ResponseEntity<UserDTO> login(
+	public ResponseEntity<LoginDTO> login(
 			@RequestParam("email") String username,
 			@RequestParam("password") String password,
 			HttpServletResponse response){
@@ -70,10 +59,8 @@ public class AuthController {
 	@GetMapping("/logout")
 	public ResponseEntity<HttpStatus> logout(
 			HttpServletResponse response){
-		Cookie authCookie = new Cookie(jwtConfig.header, null);
-		authCookie.setMaxAge(0);
-		authCookie.setPath("/");
-		response.addCookie(authCookie);
+		Cookie expiredCookie = cookieUtils.generateExpiredCookie();
+		response.addCookie(expiredCookie);
 		return new ResponseEntity(HttpStatus.OK);
 	}
 }

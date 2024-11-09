@@ -8,6 +8,7 @@ import java.util.List;
 import com.HungTran.MeetingTeam.Repository.FriendRelationRepo;
 import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -39,23 +40,15 @@ import com.cloudinary.Cloudinary;
 import jakarta.transaction.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-	@Autowired
-	UserRepo userRepo;
-	@Autowired
-	FriendRelationRepo frRepo;
-	@Autowired
-	UserConverter userConverter;
-	@Autowired
-	ChatService chatService;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	AuthService authService;
-	@Autowired
-	CloudinaryService cloudinaryService;
-	@Autowired
-	SocketTemplate socketTemplate;
+	private final UserRepo userRepo;
+	private final FriendRelationRepo frRepo;
+	private final UserConverter userConverter;
+	private final InfoChecking infoChecking;
+	private final AuthService authService;
+	private final CloudinaryService cloudinaryService;
+	private final SocketTemplate socketTemplate;
 
 	public UserDTO getUserInfo() {
 		return userConverter.convertUserToDTO(infoChecking.getUserFromContext());

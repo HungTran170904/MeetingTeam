@@ -8,7 +8,7 @@ const friendsReducer=createSlice({
                     },
                     addFriendChatMessage:(state,action)=>{
                               const message=action.payload;
-                              let friendIndex=state.findIndex(friend=>friend.id===message.recipientId);
+                              let friendIndex=state.findIndex(friend=>friend.id===message.recipientId||friend.id===message.senderId);
                               if(friendIndex>-1){
                                         let friend=state[friendIndex]; 
                                         if(friend.messages){

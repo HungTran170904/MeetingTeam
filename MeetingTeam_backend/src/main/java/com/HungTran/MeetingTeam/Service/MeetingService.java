@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -42,33 +43,23 @@ import com.HungTran.MeetingTeam.Util.ZegoToken;
 import jakarta.transaction.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Transactional
 public class MeetingService {
-	@Autowired
-	RabbitMQService rabbitMQService;
-	@Autowired
-	ZegoToken zegoToken;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	MeetingConverter meetingConverter;
-	@Autowired
-	SocketTemplate socketTemplate;
-	@Autowired
-	ChannelRepo channelRepo;
-	@Autowired
-	MeetingRepo meetingRepo;
-	@Autowired
-	TeamMemberRepo tmRepo;
-	@Autowired
-	UserRepo userRepo;
+	private final RabbitMQService rabbitMQService;
+	private final ZegoToken zegoToken;
+	private final InfoChecking infoChecking;
+	private final MeetingConverter meetingConverter;
+	private final SocketTemplate socketTemplate;
+	private final ChannelRepo channelRepo;
+	private final MeetingRepo meetingRepo;
+	private final TeamMemberRepo tmRepo;
+	private final UserRepo userRepo;
+	private final UserConverter userConverter;
+	private final DateTimeUtil dateTimeUtil;
 	@Value("${zegocloud.app-id}")
 	String zegoAppId;
-    @Autowired
-    UserConverter userConverter;
-	@Autowired
-	DateTimeUtil dateTimeUtil;
-	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
+	private ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
 
 	public ObjectNode generateToken(String meetingId) {
 		var meeting=meetingRepo.findById(meetingId).orElseThrow(()->new RequestException("MeetingId "+meetingId+" does not exists"));

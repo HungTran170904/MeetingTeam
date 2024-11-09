@@ -7,8 +7,11 @@ import { logout } from "../../API/AuthAPI.js";
 const Navbar=()=>{
           const user=useSelector(state=>state.user);
           function handleSignOut(){
-            logout().then(()=> window.location.replace("/login"))
-                          .catch(err=>alert(err));
+            logout().then(()=>{
+              localStorage.removeItem("tokenExpiredDate");
+              window.location.replace("/login");
+            })
+            .catch(err=>alert(err));
           }
           return(
                     <header className="p-3 mb-3 border-bottom">

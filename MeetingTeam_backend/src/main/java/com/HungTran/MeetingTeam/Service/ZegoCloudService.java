@@ -5,6 +5,7 @@ import com.HungTran.MeetingTeam.Repository.ChannelRepo;
 import com.HungTran.MeetingTeam.Util.Constraint;
 import com.HungTran.MeetingTeam.Util.DateTimeUtil;
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -18,17 +19,13 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 @Service
+@RequiredArgsConstructor
 public class ZegoCloudService {
-	@Autowired
-	MeetingRepo meetingRepo;
-	@Autowired
-	ChannelRepo channelRepo;
-	@Autowired
-	MeetingConverter meetingConverter;
-	@Autowired
-	SocketTemplate socketTemplate;
-	@Autowired
-	DateTimeUtil dateTimeUtil;
+	private final MeetingRepo meetingRepo;
+	private final ChannelRepo channelRepo;
+	private final MeetingConverter meetingConverter;
+	private final SocketTemplate socketTemplate;
+	private final DateTimeUtil dateTimeUtil;
 
 	public void createRoomNotification(String roomId) {
 		var meeting=meetingRepo.findById(roomId).orElseThrow(()->new RequestException("RoomId "+roomId+" does not exists"));

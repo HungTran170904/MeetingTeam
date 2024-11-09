@@ -1,5 +1,6 @@
 package com.HungTran.MeetingTeam.Exception;
 
+import com.HungTran.MeetingTeam.Util.Constraint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler{
 		 LOGGER.error(e.getMessage());
 		 Message error=new Message();
 		 error.setContent(e.getMessage());
-		 error.setMessageType("ERROR");
+		 error.setMessageType(Constraint.ERROR);
 		 messageTemplate.convertAndSendToUser(infoChecking.getUserIdFromContext(),"/user", error);
 	  }
 	 @ExceptionHandler({AuthenticationCredentialsNotFoundException.class,

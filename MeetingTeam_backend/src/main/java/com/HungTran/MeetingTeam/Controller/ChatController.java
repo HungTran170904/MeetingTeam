@@ -3,6 +3,7 @@ package com.HungTran.MeetingTeam.Controller;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -33,12 +34,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping("/api/chat")
+@RequiredArgsConstructor
 public class ChatController {
-	@Autowired
-	ChatService chatService;
-	@Autowired
-	UserService userService;
+	private final ChatService chatService;
 	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
+
 	@MessageMapping("/message")
 	public void receiveMessage(@Payload Message message) {
 		chatService.receivePublicChatMessage(message, null);

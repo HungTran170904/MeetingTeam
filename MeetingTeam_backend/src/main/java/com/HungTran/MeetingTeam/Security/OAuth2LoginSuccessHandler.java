@@ -2,15 +2,17 @@ package com.HungTran.MeetingTeam.Security;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
+import com.HungTran.MeetingTeam.Config.JwtConfig;
 import com.HungTran.MeetingTeam.Converter.UserConverter;
 import com.HungTran.MeetingTeam.DTO.UserDTO;
 import com.HungTran.MeetingTeam.Exception.RequestException;
+import com.HungTran.MeetingTeam.Util.CookieUtils;
 import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -31,20 +33,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler{
-	@Autowired
-	private UserRepo userRepo;
-	@Autowired
-	private RoleRepo roleRepo;
-	@Autowired
-	private UserConverter userConverter;
-	@Autowired
-	private JwtProvider jwtProvider;
+	private final UserRepo userRepo;
+	private final RoleRepo roleRepo;
+	private final UserConverter userConverter;
+	private final JwtProvider jwtProvider;
+	private final JwtConfig jwtConfig;
+	private final CookieUtils cookieUtils;
+	private final CustomStatelessAuthorizationRequestRepository authRequestRepository;
+
 	@Value("${frontend.url}")
 	private String frontendUrl;
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws ServletException, IOException {
+		authRequestRepository.removeAuthorizationRequestCookies(request, response);
 		try{
 			var auth2Token = (OAuth2AuthenticationToken) authentication;
 			DefaultOAuth2User principal = (DefaultOAuth2User) auth2Token.getPrincipal();
@@ -59,8 +64,13 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 			Authentication securityAuth = new OAuth2AuthenticationToken(newUser,grantedAuthorities,
 					auth2Token.getAuthorizedClientRegistrationId());
 			SecurityContextHolder.getContext().setAuthentication(securityAuth);
-			response.addCookie(jwtProvider.generateTokenCookie(securityAuth));
-			this.setDefaultTargetUrl(frontendUrl+"/friendChat");
+
+			Cookie authCookie= cookieUtils.generateTokenCookie(jwtProvider.generateToken(securityAuth));
+			response.addCookie(authCookie);
+
+			var tokenExpiredDate=new Date((new Date()).getTime() + jwtConfig.expiration);
+			var isoString=tokenExpiredDate.toInstant().atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT);
+			this.setDefaultTargetUrl(frontendUrl+"/friendsPage?tokenExpiredDate="+isoString);
 		}
 		catch(Exception e){
 			e.printStackTrace();

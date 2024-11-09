@@ -2,6 +2,7 @@ package com.HungTran.MeetingTeam.Controller;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/team")
+@RequiredArgsConstructor
 public class TeamController {
-	@Autowired
-	TeamService teamService;
+	private final TeamService teamService;
 	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
+
 	@PostMapping("/createTeam")
 	public ResponseEntity<TeamDTO> addTeam(
 			@RequestBody TeamDTO team) {

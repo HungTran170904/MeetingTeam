@@ -3,6 +3,8 @@ package com.HungTran.MeetingTeam.Controller;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,15 +40,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
+@Slf4j
 public class UserController {
-	@Autowired
-	UserService userService;
+	private final UserService userService;
 	private final ObjectMapper objectMapper=new ObjectMapper().findAndRegisterModules();
-	Logger log =LoggerFactory.getLogger("UserController");
+
 	@GetMapping("/getUserInfo")
 	public ResponseEntity<UserDTO> getUserInfo(){
 		return ResponseEntity.ok(userService.getUserInfo());
 	}
+
 	@PutMapping("/updateUser")
 	public ResponseEntity<UserDTO> updateUser(
 			@RequestParam("userDTO") String userJson,
@@ -56,10 +60,12 @@ public class UserController {
 		UserDTO dto=objectMapper.readValue(userJson,UserDTO.class);
 		return ResponseEntity.ok(userService.updateUser(dto,currentPassword,file));
 	}
+
 	@GetMapping("/getFriends")
 	public ResponseEntity<List<UserDTO>> getFriends(){
 		return ResponseEntity.ok(userService.getFriends());
 	}
+
 	@DeleteMapping("/unfriend/{friendId}")
 	public ResponseEntity<HttpStatus> unfriend(
 			@PathVariable("friendId") String friendId){

@@ -3,6 +3,7 @@ package com.HungTran.MeetingTeam.Service;
 import java.util.List;
 
 import com.HungTran.MeetingTeam.Util.SocketTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -22,23 +23,17 @@ import com.HungTran.MeetingTeam.Repository.TeamRepo;
 import com.HungTran.MeetingTeam.Util.InfoChecking;
 
 @Service
+@RequiredArgsConstructor
 public class TeamRequestService {
-	@Autowired
-	TeamRepo teamRepo;
-	@Autowired
-	RequestMessageRepo requestMessRepo;
-	@Autowired
-	TeamMemberRepo teamMemberRepo;
-	@Autowired
-	TeamMemberConverter tmConverter;
-	@Autowired
-	TeamConverter teamConverter;
-	@Autowired
-	SocketTemplate socketTemplate;
-	@Autowired
-	InfoChecking infoChecking;
-	@Autowired
-	RequestMessageConverter rmConverter;
+	private final TeamRepo teamRepo;
+	private final RequestMessageRepo requestMessRepo;
+	private final TeamMemberRepo teamMemberRepo;
+	private final TeamMemberConverter tmConverter;
+	private final TeamConverter teamConverter;
+	private final SocketTemplate socketTemplate;
+	private final InfoChecking infoChecking;
+	private final RequestMessageConverter rmConverter;
+
 	public List<RequestMessageDTO> getTeamRequestMessages(String teamId) {
 		var messages= requestMessRepo.getTeamRequestMessages(teamId);
 		return rmConverter.convertToDTO(messages);

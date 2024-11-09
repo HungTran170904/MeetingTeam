@@ -1,0 +1,15 @@
+apiVersion: v2
+appVersion: 5.8.4
+description: A Helm chart for Elasticsearch Curator
+home: https://github.com/elastic/curator
+icon: https://helm.elastic.co/icons/elasticsearch.png
+keywords:
+- curator
+- elasticsearch
+- elasticsearch-curator
+name: elasticsearch-curator
+sources:
+- https://github.com/lebenitza/helm-elasticsearch-curator
+- https://github.com/bitnami/bitnami-docker-elasticsearch-curator
+type: application
+version: 3.2.3

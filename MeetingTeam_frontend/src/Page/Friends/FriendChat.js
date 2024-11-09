@@ -13,7 +13,6 @@ import EmojiPicker from "emoji-picker-react";
 import { ReactionDetails, ReactionList} from "../../Component/Message/Reaction.js";
 import MessageType from "../../Component/Message/MessageType.js";
 import Avatar from "../../Component/Avatar/Avartar.js";
-import Voting from "../../Component/Voting/Voting.js";
 import UnfriendModal from "./UnfriendModal.js";
 
 
@@ -65,6 +64,7 @@ const FriendChat=({friend, indexChatFriend})=>{
                     createdAt: new Date()
                 }
                 sendPrivateFileMessage(message, file);
+                e.target.value="";
           }
           function handleEmojiPicker(emojiData, e){
                 setTextMessage(prev=>prev+emojiData.emoji);

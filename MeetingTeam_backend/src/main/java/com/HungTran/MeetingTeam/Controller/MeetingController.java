@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.HungTran.MeetingTeam.DTO.CalendarDTO;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,10 @@ import com.HungTran.MeetingTeam.Service.MeetingService;
 
 @RestController
 @RequestMapping("/api/meeting")
+@RequiredArgsConstructor
 public class MeetingController {
-	@Autowired
-	MeetingService meetingService;
+	private final MeetingService meetingService;
+
 	@PostMapping("/createMeeting")
 	public ResponseEntity<String> createMeeting(
 			@RequestBody MeetingDTO dto){
@@ -41,12 +43,14 @@ public class MeetingController {
 		meetingService.updateMeeting(dto);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+
 	@MessageMapping("/meetingReaction/{meetingId}")
 	public void reactMeeting(
 			@Payload MessageReaction reaction,
 			@DestinationVariable("meetingId") String meetingId) {
 		meetingService.reactMeeting(meetingId, reaction);
 	}
+
 	@GetMapping("/registerEmailNotification")
 	public ResponseEntity<HttpStatus> registerEmailNotification(
 			@RequestParam("meetingId") String meetingId,
@@ -54,6 +58,7 @@ public class MeetingController {
 		meetingService.registerEmailNotification(meetingId, receiveEmail);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+
 	@GetMapping("/addToCalendar")
 	public ResponseEntity<HttpStatus> addToCalendar(
 			@RequestParam("meetingId") String meetingId,
@@ -61,28 +66,33 @@ public class MeetingController {
 		meetingService.addToCalendar(meetingId,isAdded);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+
 	@GetMapping("/meetingsOfWeek/{week}")
 	public ResponseEntity<CalendarDTO> getMeetingsOfWeek(
 			@PathVariable("week") Integer week){
 		return ResponseEntity.ok(meetingService.getMeetingsOfWeek(week));
 	}
+
 	@GetMapping("/getVideoChannelMeetings")
 	public ResponseEntity<List<MeetingDTO>> getVideoChannelMeetings(
 			@RequestParam("channelId") String channelId,
 			@RequestParam("receivedMeetingNum") Integer receivedMeetingNum){
 		return ResponseEntity.ok(meetingService.getVideoChannelMeetings(channelId,receivedMeetingNum));
 	}
+
 	@GetMapping("/generateToken")
 	public ResponseEntity<ObjectNode> generateToken(
 			@RequestParam("meetingId") String meetingId){
 		return ResponseEntity.ok(meetingService.generateToken(meetingId));
 	}
+
 	@DeleteMapping("/cancelMeeting/{meetingId}")
 	public ResponseEntity<HttpStatus> cancelMeeting(
 			@PathVariable("meetingId") String meetingId){
 		meetingService.cancelMeeting(meetingId);
 		return new ResponseEntity(HttpStatus.OK);
 	}
+
 	@DeleteMapping("/deleteMeeting/{meetingId}")
 	public ResponseEntity<HttpStatus> deleteMeeting(
 			@PathVariable("meetingId") String meetingId){

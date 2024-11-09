@@ -1,0 +1,157 @@
+# Default values for common.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: hungtran679/mt-backend:v2
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+rbac:
+  create: false
+
+serviceAccount:
+  create: false
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+configmap:
+  enabled: false
+
+env:
+  - name: DB_HOST
+    value: mysql
+  - name: DB_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_PORT
+  - name: DB_USER
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_USER
+  - name: DB_PASS
+    valueFrom:
+      secretKeyRef:
+        name: mysql
+        key: DB_PASS
+  - name: DB_DATABASE
+    valueFrom:
+      configMapKeyRef:
+        name: mysql
+        key: DB_DATABASE
+  - name: RABBITMQ_HOST
+    value: rabbitmq
+  - name: RABBITMQ_AMQP_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_AMQP_PORT
+  - name: RABBITMQ_STOMP_PORT
+    valueFrom:
+      configMapKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_STOMP_PORT
+  - name: RABBITMQ_USER
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_DEFAULT_USER
+  - name: RABBITMQ_PASS
+    valueFrom:
+      secretKeyRef:
+        name: rabbitmq
+        key: RABBITMQ_DEFAULT_PASS
+  - name: FRONTEND_URL
+    value: http://k8s.frontend.chatapp.local
+  - name: MAIN_DOMAIN
+    value: chatapp.local
+
+pvc:
+  enabled: false
+
+job:
+  enabled: true
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+  imagePullSecrets: []
+  image: "hungtran679/mt-flyway"
+  pullPolicy: IfNotPresent
+  env:
+    - name: DB_HOST
+      value: mysql
+    - name: DB_PORT
+      valueFrom:
+        configMapKeyRef:
+          name: mysql
+          key: DB_PORT
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: mysql
+          key: DB_USER
+    - name: DB_PASS
+      valueFrom:
+        secretKeyRef:
+          name: mysql
+          key: DB_PASS
+    - name: DB_DATABASE
+      valueFrom:
+        configMapKeyRef:
+          name: mysql
+          key: DB_DATABASE
+  restartPolicy: OnFailure
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.org/websocket-services: "backend"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/server-snippets: |
+      location / {
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Host $host;
+        proxy_set_header Connection "upgrade";
+        proxy_cache_bypass $http_upgrade;
+        }
+  hosts:
+    - host: k8s.backend.chatapp.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources: {}
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

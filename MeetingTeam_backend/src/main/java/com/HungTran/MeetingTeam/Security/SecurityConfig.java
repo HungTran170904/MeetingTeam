@@ -37,27 +37,34 @@ public class SecurityConfig {
 	private String frontendUrl;
 	@Autowired
 	private OAuth2LoginSuccessHandler successHandler;
+	@Autowired
+	private CustomStatelessAuthorizationRequestRepository authorizationRequestRepository;
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+
 	@Bean
 	public AuthenticationManager authenticationManager(
 			AuthenticationConfiguration authConfig) throws Exception{
 		return authConfig.getAuthenticationManager();
 	}
+
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() {
 		return new JwtAuthenticationFilter();
 	}
+
 	@Bean
 	public ZegoTokenFilter zegoTokenFilter() {
 		return new ZegoTokenFilter();
 	}
+
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		final CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(Arrays.asList("http://localhost:3000", frontendUrl));;
+		config.setAllowedOrigins(Arrays.asList("http://localhost:3000", frontendUrl));
 		config.setAllowedMethods(Arrays.asList("*"));
 		config.setAllowCredentials(true);
 		config.setAllowedHeaders(List.of("*"));
@@ -65,6 +72,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config); // '/**' means apply this cors configuration to all endpoints
         return source;
 	}
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
@@ -81,6 +89,9 @@ public class SecurityConfig {
 					.requestMatchers("/**/admin/**").hasRole(Constraint.ADMIN)
 					.anyRequest().authenticated())
 			.oauth2Login(oath2->{
+				oath2.authorizationEndpoint(subconfig->{
+					subconfig.authorizationRequestRepository(authorizationRequestRepository);
+				});
 				oath2.loginPage("/login").successHandler(successHandler).permitAll();
 			});
 		return http.build();

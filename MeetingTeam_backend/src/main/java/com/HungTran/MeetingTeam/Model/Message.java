@@ -33,9 +33,11 @@ public class Message {
 	private String messageType; // UNSEND,TEXT, FILE, IMAGE, VIDEO, AUDIO
 	private String parentMessageId; 
 	private String fileName;
+
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter=ReactionConverter.class)
 	private List<MessageReaction> reactions;
+
 	@Column(columnDefinition = "TEXT")
 	@Convert(converter= VotingConverter.class)
 	private Voting voting;
