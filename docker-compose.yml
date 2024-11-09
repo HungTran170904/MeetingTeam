@@ -24,21 +24,12 @@ services:
       DB_DATABASE: ${DB_DATABASE}
     networks:
       - meeting-team-network
-  noti-broker:
+  rabbitmq-service:
     image: rabbitmq:3.12.9-management
-    container_name: noti-broker
+    container_name: rabbitmq-service
     ports:
       - 15672:15672
       - 5672:5672
-    networks:
-      - meeting-team-network
-  stomp-broker:
-    image: hungtran679/stomp-broker
-    container_name: stomp-broker
-    ports:
-      - 15673:15672
-      - 5673:5672
-      - 61613:61613
     networks:
       - meeting-team-network
   backend-service:
@@ -56,14 +47,11 @@ services:
         DB_USER: ${DB_USER}
         DB_PASS: ${DB_PASS}
         DB_DATABASE: ${DB_DATABASE}
-        NOTIBROKER_HOST: noti-broker
-        NOTIBROKER_PORT: 5672
-        NOTIBROKER_USER: ${NOTIBROKER_USER}
-        NOTIBROKER_PASS: ${NOTIBROKER_PASS}
-        STOMPBROKER_HOST: stomp-broker
-        STOMPBROKER_PORT: 61613
-        STOMPBROKER_USER: ${STOMPBROKER_USER}
-        STOMPBROKER_PASS: ${STOMPBROKER_PASS}
+        RABBITMQ_HOST: rabbitmq-service
+        RABBITMQ_AMQP_PORT: ${RABBITMQ_AMQP_PORT}
+        RABBITMQ_STOMP_PORT: ${RABBITMQ_STOMP_PORT}
+        RABBITMQ_USER: ${RABBITMQ_USER}
+        RABBITMQ_PASS: ${RABBITMQ_PASS}
         FRONTEND_URL: ${FRONTEND_URL}
     networks:
         - meeting-team-network
@@ -81,10 +69,10 @@ services:
         DB_USER: ${DB_USER}
         DB_PASS: ${DB_PASS}
         DB_DATABASE: ${DB_DATABASE}
-        NOTIBROKER_HOST: noti-broker
-        NOTIBROKER_PORT: 5672
-        NOTIBROKER_USER: ${NOTIBROKER_USER}
-        NOTIBROKER_PASS: ${NOTIBROKER_PASS}
+        NOTIBROKER_HOST: rabbitmq-service
+        NOTIBROKER_PORT: ${RABBITMQ_AMQP_PORT}
+        NOTIBROKER_USER: ${RABBITMQ_USER}
+        NOTIBROKER_PASS: ${RABBITMQ_PASS}
       networks:
         - meeting-team-network
 networks:
